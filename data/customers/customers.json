@@ -1,0 +1,452 @@
+[
+  {
+    "customer_id": "CUS-1001",
+    "name": "Aarav Kumar",
+    "email": "aarav.kumar@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "77001",
+    "phone_last4": "1409",
+    "created_at": "2024-10-31T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1002",
+    "name": "Elena Rostova",
+    "email": "elena.rostova@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "75201",
+    "phone_last4": "5012",
+    "created_at": "2024-09-09T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1003",
+    "name": "Marcus Chen",
+    "email": "marcus.chen@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "85001",
+    "phone_last4": "2679",
+    "created_at": "2025-06-01T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1004",
+    "name": "Chloe Bennett",
+    "email": "chloe.bennett@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "60601",
+    "phone_last4": "7912",
+    "created_at": "2024-10-12T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1005",
+    "name": "Devon Vance",
+    "email": "devon.vance@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "10001",
+    "phone_last4": "2535",
+    "created_at": "2025-09-07T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1006",
+    "name": "Priya Sharma",
+    "email": "priya.sharma@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "92101",
+    "phone_last4": "9279",
+    "created_at": "2025-06-04T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1007",
+    "name": "Liam O'Connor",
+    "email": "liam.oconnor@example.com",
+    "account_status": "SUSPENDED",
+    "billing_zip": "10001",
+    "phone_last4": "4257",
+    "created_at": "2024-11-19T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1008",
+    "name": "Fatima Al-Mansoor",
+    "email": "fatima.al-mansoor@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "02108",
+    "phone_last4": "4611",
+    "created_at": "2024-09-22T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1009",
+    "name": "Mateo Silva",
+    "email": "mateo.silva@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "75201",
+    "phone_last4": "1106",
+    "created_at": "2025-02-06T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1010",
+    "name": "Sophia Taylor",
+    "email": "sophia.taylor@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "19102",
+    "phone_last4": "7924",
+    "created_at": "2024-08-31T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1011",
+    "name": "Noah Brooks",
+    "email": "noah.brooks@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "75201",
+    "phone_last4": "3547",
+    "created_at": "2025-04-02T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1012",
+    "name": "Aaliyah Khan",
+    "email": "aaliyah.khan@example.com",
+    "account_status": "LOCKED",
+    "billing_zip": "78701",
+    "phone_last4": "2674",
+    "created_at": "2025-06-05T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1013",
+    "name": "Lucas Dubois",
+    "email": "lucas.dubois@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "80202",
+    "phone_last4": "2584",
+    "created_at": "2025-08-07T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1014",
+    "name": "Maya Patel",
+    "email": "maya.patel@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "98101",
+    "phone_last4": "5333",
+    "created_at": "2025-03-24T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1015",
+    "name": "Ethan Wright",
+    "email": "ethan.wright@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "33101",
+    "phone_last4": "9785",
+    "created_at": "2025-09-01T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1016",
+    "name": "Zoe Kowalski",
+    "email": "zoe.kowalski@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "80202",
+    "phone_last4": "2291",
+    "created_at": "2025-07-22T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1017",
+    "name": "Kenji Takahashi",
+    "email": "kenji.takahashi@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "95101",
+    "phone_last4": "6925",
+    "created_at": "2024-12-15T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1018",
+    "name": "Amara Okafor",
+    "email": "amara.okafor@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "78201",
+    "phone_last4": "2139",
+    "created_at": "2024-12-02T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1019",
+    "name": "Gabriel Santos",
+    "email": "gabriel.santos@example.com",
+    "account_status": "SUSPENDED",
+    "billing_zip": "92101",
+    "phone_last4": "5741",
+    "created_at": "2025-08-31T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1020",
+    "name": "Isabella Novak",
+    "email": "isabella.novak@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "92101",
+    "phone_last4": "2654",
+    "created_at": "2025-08-14T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1021",
+    "name": "Julian Morales",
+    "email": "julian.morales@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "75201",
+    "phone_last4": "8428",
+    "created_at": "2025-03-13T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1022",
+    "name": "Layla Haddad",
+    "email": "layla.haddad@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "98101",
+    "phone_last4": "3664",
+    "created_at": "2024-11-02T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1023",
+    "name": "Oliver Johansson",
+    "email": "oliver.johansson@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "98101",
+    "phone_last4": "4432",
+    "created_at": "2025-03-18T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1024",
+    "name": "Nadia Lindqvist",
+    "email": "nadia.lindqvist@example.com",
+    "account_status": "LOCKED",
+    "billing_zip": "75201",
+    "phone_last4": "2169",
+    "created_at": "2024-10-15T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1025",
+    "name": "Caleb Gomez",
+    "email": "caleb.gomez@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "19102",
+    "phone_last4": "9751",
+    "created_at": "2024-11-16T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1026",
+    "name": "Hannah Mercer",
+    "email": "hannah.mercer@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "92101",
+    "phone_last4": "3677",
+    "created_at": "2024-09-15T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1027",
+    "name": "Diego Yamamoto",
+    "email": "diego.yamamoto@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "80202",
+    "phone_last4": "5422",
+    "created_at": "2025-01-30T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1028",
+    "name": "Mei Rossi",
+    "email": "mei.rossi@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "92101",
+    "phone_last4": "6313",
+    "created_at": "2024-10-31T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1029",
+    "name": "Tristan Sinclair",
+    "email": "tristan.sinclair@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "90210",
+    "phone_last4": "4752",
+    "created_at": "2024-08-26T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1030",
+    "name": "Ananya Deshmukh",
+    "email": "ananya.deshmukh@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "78701",
+    "phone_last4": "7572",
+    "created_at": "2025-09-07T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1031",
+    "name": "Samuel Nygren",
+    "email": "samuel.nygren@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "60601",
+    "phone_last4": "4456",
+    "created_at": "2025-05-09T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1032",
+    "name": "Grace Alvarez",
+    "email": "grace.alvarez@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "78701",
+    "phone_last4": "4483",
+    "created_at": "2024-12-07T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1033",
+    "name": "Leila Moretti",
+    "email": "leila.moretti@example.com",
+    "account_status": "LOCKED",
+    "billing_zip": "97201",
+    "phone_last4": "7482",
+    "created_at": "2024-10-23T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1034",
+    "name": "Isaac Fischer",
+    "email": "isaac.fischer@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "33101",
+    "phone_last4": "3340",
+    "created_at": "2024-10-29T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1035",
+    "name": "Camila Mendoza",
+    "email": "camila.mendoza@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "85001",
+    "phone_last4": "5040",
+    "created_at": "2025-05-11T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1036",
+    "name": "Dante Castillo",
+    "email": "dante.castillo@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "75201",
+    "phone_last4": "8019",
+    "created_at": "2024-09-07T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1037",
+    "name": "Mira Schneider",
+    "email": "mira.schneider@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "80202",
+    "phone_last4": "6930",
+    "created_at": "2024-11-29T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1038",
+    "name": "Nathan Harrington",
+    "email": "nathan.harrington@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "85001",
+    "phone_last4": "9348",
+    "created_at": "2025-06-03T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1039",
+    "name": "Sora Kim",
+    "email": "sora.kim@example.com",
+    "account_status": "SUSPENDED",
+    "billing_zip": "60601",
+    "phone_last4": "1771",
+    "created_at": "2025-01-14T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1040",
+    "name": "Victor Nakamura",
+    "email": "victor.nakamura@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "85001",
+    "phone_last4": "3621",
+    "created_at": "2025-07-29T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1041",
+    "name": "Zara Ibrahim",
+    "email": "zara.ibrahim@example.com",
+    "account_status": "LOCKED",
+    "billing_zip": "02108",
+    "phone_last4": "2040",
+    "created_at": "2024-10-10T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1042",
+    "name": "Felix Larsson",
+    "email": "felix.larsson@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "80202",
+    "phone_last4": "8668",
+    "created_at": "2025-03-10T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1043",
+    "name": "Ruby Bautista",
+    "email": "ruby.bautista@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "75201",
+    "phone_last4": "1188",
+    "created_at": "2024-12-27T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1044",
+    "name": "Adrian MacLeod",
+    "email": "adrian.macleod@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "77001",
+    "phone_last4": "9797",
+    "created_at": "2024-10-10T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1045",
+    "name": "Keira Kaur",
+    "email": "keira.kaur@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "75201",
+    "phone_last4": "6573",
+    "created_at": "2024-09-04T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1046",
+    "name": "Tariq Dumont",
+    "email": "tariq.dumont@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "95101",
+    "phone_last4": "8123",
+    "created_at": "2025-07-28T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1047",
+    "name": "Sienna Espinoza",
+    "email": "sienna.espinoza@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "33101",
+    "phone_last4": "1053",
+    "created_at": "2025-07-05T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1048",
+    "name": "Leo Bergman",
+    "email": "leo.bergman@example.com",
+    "account_status": "LOCKED",
+    "billing_zip": "75201",
+    "phone_last4": "9201",
+    "created_at": "2024-09-19T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1049",
+    "name": "Freja Zhao",
+    "email": "freja.zhao@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "19102",
+    "phone_last4": "9317",
+    "created_at": "2024-08-29T00:00:00Z"
+  },
+  {
+    "customer_id": "CUS-1050",
+    "name": "Kiran Reddy",
+    "email": "kiran.reddy@example.com",
+    "account_status": "ACTIVE",
+    "billing_zip": "95101",
+    "phone_last4": "9317",
+    "created_at": "2025-07-31T00:00:00Z"
+  }
+]
