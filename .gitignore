@@ -4,20 +4,24 @@ venv/
 ENV/
 env/
 
-# Python Cache & Artifacts
+# Python Cache & Bytecode
 __pycache__/
 *.py[cod]
 *$py.class
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
 *.egg-info/
 dist/
 build/
 
-# Node / Frontend Cache & Dependencies
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# Node & Frontend Cache (for upcoming frontend phase)
 node_modules/
 .cache/
 .npm/
@@ -26,20 +30,41 @@ node_modules/
 .next/
 out/
 
-# IDEs & Editors
+# IDEs & System Files
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS & Logs
 .DS_Store
 Thumbs.db
-*.log
+ehthumbs.db
+Desktop.ini
 
-# Environment variables
+# Logs & Debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Environment Variables & Secrets
 .env
 .env.local
 .env.*.local
+!.env.example
 
-*__init__.py
+# Vector Cache & Large Binary Indexes
+backend/data/vector_cache/
+backend/data/*.bin
+backend/data/*.json
+*.faiss
+*.bin
+.hf_cache/
+huggingface/
+
+# Local Databases (if used for sqlite development)
+*.sqlite
+*.sqlite3
+*.db
+
+# Temporary Evaluation Run Results
+evals/results/*
+!evals/results/.gitkeep
