@@ -1,5 +1,18 @@
 [
   {
+    "order_id": "ORD-0001",
+    "customer_id": "CUS-0001",
+    "order_date": "2026-09-20",
+    "amount": 249.99,
+    "currency": "USD",
+    "status": "DELIVERED",
+    "payment_id": "PAY-0001",
+    "shipping_status": "DELIVERED",
+    "product_category": "Electronics",
+    "refundable": true,
+    "delivered_at": "2026-09-24"
+  },
+  {
     "order_id": "ORD-1001",
     "customer_id": "CUS-1001",
     "order_date": "2026-09-12T12:00:00Z",

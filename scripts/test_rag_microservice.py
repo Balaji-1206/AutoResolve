@@ -16,9 +16,9 @@ import sys
 import time
 from pathlib import Path
 
-# Add backend directory to sys.path
+# Add rag-service directory to sys.path
 repo_root = Path(__file__).resolve().parent.parent
-sys.path.append(str(repo_root / "backend"))
+sys.path.append(str(repo_root / "services" / "rag-service"))
 
 from fastapi.testclient import TestClient
 from app.main import app

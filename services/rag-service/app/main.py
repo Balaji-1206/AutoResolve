@@ -26,9 +26,9 @@ async def lifespan(app: FastAPI):
     Code after `yield` runs during server shutdown:
     - Performs resource cleanup.
     """
-    repo_root = Path(__file__).resolve().parent.parent.parent
+    repo_root = Path(__file__).resolve().parent.parent.parent.parent
     knowledge_dir = os.getenv("KNOWLEDGE_PATH", str(repo_root / "knowledge"))
-    cache_dir = os.getenv("VECTOR_CACHE_PATH", str(repo_root / "backend" / "data" / "vector_cache"))
+    cache_dir = os.getenv("VECTOR_CACHE_PATH", str(Path(__file__).resolve().parent.parent / "data" / "vector_cache"))
 
     # Initialize RAG Pipeline singleton
     app.state.rag_pipeline = RAGPipeline(

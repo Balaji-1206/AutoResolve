@@ -4,7 +4,7 @@ from app.rag.pipeline import RAGPipeline
 
 
 def test_rag_search():
-    repo_root = Path(__file__).resolve().parent.parent.parent
+    repo_root = Path(__file__).resolve().parent.parent.parent.parent
     knowledge_path = str(repo_root / "knowledge")
     
     rag = RAGPipeline(knowledge_path)
@@ -19,7 +19,7 @@ def test_rag_search():
 
 
 def test_rag_out_of_scope():
-    repo_root = Path(__file__).resolve().parent.parent.parent
+    repo_root = Path(__file__).resolve().parent.parent.parent.parent
     knowledge_path = str(repo_root / "knowledge")
     
     rag = RAGPipeline(knowledge_path)
@@ -30,7 +30,7 @@ def test_rag_out_of_scope():
 
 
 def test_reindex_idempotency():
-    repo_root = Path(__file__).resolve().parent.parent.parent
+    repo_root = Path(__file__).resolve().parent.parent.parent.parent
     knowledge_path = str(repo_root / "knowledge")
     
     rag = RAGPipeline(knowledge_path)

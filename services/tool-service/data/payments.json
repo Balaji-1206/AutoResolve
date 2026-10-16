@@ -1,0 +1,1502 @@
+[
+  {
+    "payment_id": "PAY-1001",
+    "order_id": "ORD-1001",
+    "customer_id": "CUS-1001",
+    "amount": 120.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-12T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1002",
+    "order_id": "ORD-1002",
+    "customer_id": "CUS-1002",
+    "amount": 750.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1003",
+    "order_id": "ORD-1003",
+    "customer_id": "CUS-1003",
+    "amount": 85.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-13T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1004",
+    "order_id": "ORD-1004",
+    "customer_id": "CUS-1004",
+    "amount": 60.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-05T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1005",
+    "order_id": "ORD-1005",
+    "customer_id": "CUS-1005",
+    "amount": 45.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1006",
+    "order_id": "ORD-1006",
+    "customer_id": "CUS-1006",
+    "amount": 210.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-30T09:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1007",
+    "order_id": "ORD-1007",
+    "customer_id": "CUS-1007",
+    "amount": 130.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-28T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1008",
+    "order_id": "ORD-1008",
+    "customer_id": "CUS-1008",
+    "amount": 95.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-24T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1009",
+    "order_id": "ORD-1009",
+    "customer_id": "CUS-1009",
+    "amount": 160.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-20T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1010",
+    "order_id": "ORD-1010",
+    "customer_id": "CUS-1010",
+    "amount": 140.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1011",
+    "order_id": "ORD-1011",
+    "customer_id": "CUS-1011",
+    "amount": 450.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-25T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1012",
+    "order_id": "ORD-1012",
+    "customer_id": "CUS-1012",
+    "amount": 90.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-27T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1013",
+    "order_id": "ORD-1013",
+    "customer_id": "CUS-1013",
+    "amount": 35.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-22T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1014",
+    "order_id": "ORD-1014",
+    "customer_id": "CUS-1014",
+    "amount": 650.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-23T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1015",
+    "order_id": "ORD-1015",
+    "customer_id": "CUS-1015",
+    "amount": 110.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-04T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1016",
+    "order_id": "ORD-1016",
+    "customer_id": "CUS-1016",
+    "amount": 220.0,
+    "status": "DISPUTED",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": "CHARGEBACK_FILED_BY_ISSUER",
+    "created_at": "2026-09-12T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1017",
+    "order_id": "ORD-1017",
+    "customer_id": "CUS-1017",
+    "amount": 65.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-20T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1018",
+    "order_id": "ORD-1018",
+    "customer_id": "CUS-1018",
+    "amount": 620.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-22T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1019",
+    "order_id": "ORD-1019",
+    "customer_id": "CUS-1019",
+    "amount": 180.0,
+    "status": "FAILED",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": "INSUFFICIENT_FUNDS",
+    "created_at": "2026-09-30T11:20:00Z"
+  },
+  {
+    "payment_id": "PAY-1020",
+    "order_id": "ORD-1020",
+    "customer_id": "CUS-1020",
+    "amount": 500.0,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1021",
+    "order_id": "ORD-1021",
+    "customer_id": "CUS-1021",
+    "amount": 72.54,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-29T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1022",
+    "order_id": "ORD-1022",
+    "customer_id": "CUS-1022",
+    "amount": 450.04,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-21T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1023",
+    "order_id": "ORD-1023",
+    "customer_id": "CUS-1023",
+    "amount": 317.86,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-22T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1024",
+    "order_id": "ORD-1024",
+    "customer_id": "CUS-1024",
+    "amount": 444.17,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1025",
+    "order_id": "ORD-1025",
+    "customer_id": "CUS-1025",
+    "amount": 577.31,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-19T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1026",
+    "order_id": "ORD-1026",
+    "customer_id": "CUS-1026",
+    "amount": 162.59,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-25T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1027",
+    "order_id": "ORD-1027",
+    "customer_id": "CUS-1027",
+    "amount": 147.22,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-25T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1028",
+    "order_id": "ORD-1028",
+    "customer_id": "CUS-1028",
+    "amount": 152.06,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-03T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1029",
+    "order_id": "ORD-1029",
+    "customer_id": "CUS-1029",
+    "amount": 310.36,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-12T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1030",
+    "order_id": "ORD-1030",
+    "customer_id": "CUS-1030",
+    "amount": 98.43,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-01T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1031",
+    "order_id": "ORD-1031",
+    "customer_id": "CUS-1031",
+    "amount": 287.33,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-10T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1032",
+    "order_id": "ORD-1032",
+    "customer_id": "CUS-1032",
+    "amount": 77.35,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-18T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1033",
+    "order_id": "ORD-1033",
+    "customer_id": "CUS-1033",
+    "amount": 284.2,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-14T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1034",
+    "order_id": "ORD-1034",
+    "customer_id": "CUS-1034",
+    "amount": 248.45,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-08T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1035",
+    "order_id": "ORD-1035",
+    "customer_id": "CUS-1035",
+    "amount": 163.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-17T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1036",
+    "order_id": "ORD-1036",
+    "customer_id": "CUS-1036",
+    "amount": 126.84,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-31T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1037",
+    "order_id": "ORD-1037",
+    "customer_id": "CUS-1037",
+    "amount": 473.45,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-06T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1038",
+    "order_id": "ORD-1038",
+    "customer_id": "CUS-1038",
+    "amount": 579.6,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-07T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1039",
+    "order_id": "ORD-1039",
+    "customer_id": "CUS-1039",
+    "amount": 117.3,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-29T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1040",
+    "order_id": "ORD-1040",
+    "customer_id": "CUS-1040",
+    "amount": 116.37,
+    "status": "CANCELLED",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": "USER_REQUESTED_CANCELLATION",
+    "created_at": "2026-09-29T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1041",
+    "order_id": "ORD-1041",
+    "customer_id": "CUS-1041",
+    "amount": 539.22,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-10T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1042",
+    "order_id": "ORD-1042",
+    "customer_id": "CUS-1042",
+    "amount": 556.31,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-10T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1043",
+    "order_id": "ORD-1043",
+    "customer_id": "CUS-1043",
+    "amount": 130.39,
+    "status": "FAILED",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": "INSUFFICIENT_FUNDS",
+    "created_at": "2026-09-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1044",
+    "order_id": "ORD-1044",
+    "customer_id": "CUS-1044",
+    "amount": 325.92,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-13T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1045",
+    "order_id": "ORD-1045",
+    "customer_id": "CUS-1045",
+    "amount": 289.62,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-02T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1046",
+    "order_id": "ORD-1046",
+    "customer_id": "CUS-1046",
+    "amount": 56.57,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-28T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1047",
+    "order_id": "ORD-1047",
+    "customer_id": "CUS-1047",
+    "amount": 355.24,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-17T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1048",
+    "order_id": "ORD-1048",
+    "customer_id": "CUS-1048",
+    "amount": 91.54,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-04T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1049",
+    "order_id": "ORD-1049",
+    "customer_id": "CUS-1049",
+    "amount": 70.5,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-18T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1050",
+    "order_id": "ORD-1050",
+    "customer_id": "CUS-1050",
+    "amount": 138.36,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-15T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1051",
+    "order_id": "ORD-1051",
+    "customer_id": "CUS-1001",
+    "amount": 97.64,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-19T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1052",
+    "order_id": "ORD-1052",
+    "customer_id": "CUS-1002",
+    "amount": 30.17,
+    "status": "CANCELLED",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": "USER_REQUESTED_CANCELLATION",
+    "created_at": "2026-08-21T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1053",
+    "order_id": "ORD-1053",
+    "customer_id": "CUS-1003",
+    "amount": 65.66,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1054",
+    "order_id": "ORD-1054",
+    "customer_id": "CUS-1004",
+    "amount": 513.88,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-04T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1055",
+    "order_id": "ORD-1055",
+    "customer_id": "CUS-1005",
+    "amount": 268.19,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1056",
+    "order_id": "ORD-1056",
+    "customer_id": "CUS-1006",
+    "amount": 571.04,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1057",
+    "order_id": "ORD-1057",
+    "customer_id": "CUS-1007",
+    "amount": 478.49,
+    "status": "FAILED",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": "DECLINED_BY_ISSUER",
+    "created_at": "2026-09-10T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1058",
+    "order_id": "ORD-1058",
+    "customer_id": "CUS-1008",
+    "amount": 171.78,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-04T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1059",
+    "order_id": "ORD-1059",
+    "customer_id": "CUS-1009",
+    "amount": 181.37,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1060",
+    "order_id": "ORD-1060",
+    "customer_id": "CUS-1010",
+    "amount": 406.56,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-06T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1061",
+    "order_id": "ORD-1061",
+    "customer_id": "CUS-1011",
+    "amount": 527.46,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-06T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1062",
+    "order_id": "ORD-1062",
+    "customer_id": "CUS-1012",
+    "amount": 49.47,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-08T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1063",
+    "order_id": "ORD-1063",
+    "customer_id": "CUS-1013",
+    "amount": 568.79,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-19T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1064",
+    "order_id": "ORD-1064",
+    "customer_id": "CUS-1014",
+    "amount": 416.65,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-25T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1065",
+    "order_id": "ORD-1065",
+    "customer_id": "CUS-1015",
+    "amount": 526.68,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1066",
+    "order_id": "ORD-1066",
+    "customer_id": "CUS-1016",
+    "amount": 331.65,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-02T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1067",
+    "order_id": "ORD-1067",
+    "customer_id": "CUS-1017",
+    "amount": 523.93,
+    "status": "CANCELLED",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": "USER_REQUESTED_CANCELLATION",
+    "created_at": "2026-08-10T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1068",
+    "order_id": "ORD-1068",
+    "customer_id": "CUS-1018",
+    "amount": 523.9,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1069",
+    "order_id": "ORD-1069",
+    "customer_id": "CUS-1019",
+    "amount": 457.96,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-04T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1070",
+    "order_id": "ORD-1070",
+    "customer_id": "CUS-1020",
+    "amount": 440.96,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-01T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1071",
+    "order_id": "ORD-1071",
+    "customer_id": "CUS-1021",
+    "amount": 566.79,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1072",
+    "order_id": "ORD-1072",
+    "customer_id": "CUS-1022",
+    "amount": 124.55,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-01T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1073",
+    "order_id": "ORD-1073",
+    "customer_id": "CUS-1023",
+    "amount": 504.56,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1074",
+    "order_id": "ORD-1074",
+    "customer_id": "CUS-1024",
+    "amount": 84.99,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-05T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1075",
+    "order_id": "ORD-1075",
+    "customer_id": "CUS-1025",
+    "amount": 135.76,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-02T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1076",
+    "order_id": "ORD-1076",
+    "customer_id": "CUS-1026",
+    "amount": 148.72,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-18T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1077",
+    "order_id": "ORD-1077",
+    "customer_id": "CUS-1027",
+    "amount": 504.72,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-11T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1078",
+    "order_id": "ORD-1078",
+    "customer_id": "CUS-1028",
+    "amount": 569.54,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1079",
+    "order_id": "ORD-1079",
+    "customer_id": "CUS-1029",
+    "amount": 511.76,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-13T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1080",
+    "order_id": "ORD-1080",
+    "customer_id": "CUS-1030",
+    "amount": 85.16,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-02T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1081",
+    "order_id": "ORD-1081",
+    "customer_id": "CUS-1031",
+    "amount": 361.45,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-28T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1082",
+    "order_id": "ORD-1082",
+    "customer_id": "CUS-1032",
+    "amount": 49.63,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-02T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1083",
+    "order_id": "ORD-1083",
+    "customer_id": "CUS-1033",
+    "amount": 264.37,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-18T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1084",
+    "order_id": "ORD-1084",
+    "customer_id": "CUS-1034",
+    "amount": 199.22,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-06T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1085",
+    "order_id": "ORD-1085",
+    "customer_id": "CUS-1035",
+    "amount": 196.65,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-03T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1086",
+    "order_id": "ORD-1086",
+    "customer_id": "CUS-1036",
+    "amount": 95.64,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-03T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1087",
+    "order_id": "ORD-1087",
+    "customer_id": "CUS-1037",
+    "amount": 440.21,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-18T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1088",
+    "order_id": "ORD-1088",
+    "customer_id": "CUS-1038",
+    "amount": 329.11,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-29T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1089",
+    "order_id": "ORD-1089",
+    "customer_id": "CUS-1039",
+    "amount": 461.1,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-22T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1090",
+    "order_id": "ORD-1090",
+    "customer_id": "CUS-1040",
+    "amount": 270.4,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1091",
+    "order_id": "ORD-1091",
+    "customer_id": "CUS-1041",
+    "amount": 72.06,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-28T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1092",
+    "order_id": "ORD-1092",
+    "customer_id": "CUS-1042",
+    "amount": 479.23,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-12T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1093",
+    "order_id": "ORD-1093",
+    "customer_id": "CUS-1043",
+    "amount": 472.64,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-20T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1094",
+    "order_id": "ORD-1094",
+    "customer_id": "CUS-1044",
+    "amount": 364.26,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-11T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1095",
+    "order_id": "ORD-1095",
+    "customer_id": "CUS-1045",
+    "amount": 344.5,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-15T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1096",
+    "order_id": "ORD-1096",
+    "customer_id": "CUS-1046",
+    "amount": 160.41,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-19T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1097",
+    "order_id": "ORD-1097",
+    "customer_id": "CUS-1047",
+    "amount": 146.46,
+    "status": "FAILED",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": "INSUFFICIENT_FUNDS",
+    "created_at": "2026-08-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1098",
+    "order_id": "ORD-1098",
+    "customer_id": "CUS-1048",
+    "amount": 52.87,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-14T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1099",
+    "order_id": "ORD-1099",
+    "customer_id": "CUS-1049",
+    "amount": 278.34,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1100",
+    "order_id": "ORD-1100",
+    "customer_id": "CUS-1050",
+    "amount": 365.02,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-14T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1101",
+    "order_id": "ORD-1101",
+    "customer_id": "CUS-1001",
+    "amount": 485.97,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-25T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1102",
+    "order_id": "ORD-1102",
+    "customer_id": "CUS-1002",
+    "amount": 503.13,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-01T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1103",
+    "order_id": "ORD-1103",
+    "customer_id": "CUS-1003",
+    "amount": 178.91,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-11T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1104",
+    "order_id": "ORD-1104",
+    "customer_id": "CUS-1004",
+    "amount": 269.13,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-15T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1105",
+    "order_id": "ORD-1105",
+    "customer_id": "CUS-1005",
+    "amount": 202.44,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1106",
+    "order_id": "ORD-1106",
+    "customer_id": "CUS-1006",
+    "amount": 237.58,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-20T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1107",
+    "order_id": "ORD-1107",
+    "customer_id": "CUS-1007",
+    "amount": 255.25,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-08T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1108",
+    "order_id": "ORD-1108",
+    "customer_id": "CUS-1008",
+    "amount": 139.79,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-03T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1109",
+    "order_id": "ORD-1109",
+    "customer_id": "CUS-1009",
+    "amount": 236.11,
+    "status": "FAILED",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": "EXPIRED_CARD",
+    "created_at": "2026-09-29T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1110",
+    "order_id": "ORD-1110",
+    "customer_id": "CUS-1010",
+    "amount": 498.66,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-07T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1111",
+    "order_id": "ORD-1111",
+    "customer_id": "CUS-1011",
+    "amount": 146.78,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-02T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1112",
+    "order_id": "ORD-1112",
+    "customer_id": "CUS-1012",
+    "amount": 396.22,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1113",
+    "order_id": "ORD-1113",
+    "customer_id": "CUS-1013",
+    "amount": 535.35,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-21T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1114",
+    "order_id": "ORD-1114",
+    "customer_id": "CUS-1014",
+    "amount": 338.24,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-28T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1115",
+    "order_id": "ORD-1115",
+    "customer_id": "CUS-1015",
+    "amount": 506.1,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-18T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1116",
+    "order_id": "ORD-1116",
+    "customer_id": "CUS-1016",
+    "amount": 142.47,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1117",
+    "order_id": "ORD-1117",
+    "customer_id": "CUS-1017",
+    "amount": 442.37,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-07T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1118",
+    "order_id": "ORD-1118",
+    "customer_id": "CUS-1018",
+    "amount": 35.76,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1119",
+    "order_id": "ORD-1119",
+    "customer_id": "CUS-1019",
+    "amount": 385.83,
+    "status": "FAILED",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": "DECLINED_BY_ISSUER",
+    "created_at": "2026-08-11T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1120",
+    "order_id": "ORD-1120",
+    "customer_id": "CUS-1020",
+    "amount": 552.03,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-17T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1121",
+    "order_id": "ORD-1121",
+    "customer_id": "CUS-1021",
+    "amount": 109.57,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-21T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1122",
+    "order_id": "ORD-1122",
+    "customer_id": "CUS-1022",
+    "amount": 551.01,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-31T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1123",
+    "order_id": "ORD-1123",
+    "customer_id": "CUS-1023",
+    "amount": 361.27,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-13T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1124",
+    "order_id": "ORD-1124",
+    "customer_id": "CUS-1024",
+    "amount": 560.42,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-23T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1125",
+    "order_id": "ORD-1125",
+    "customer_id": "CUS-1025",
+    "amount": 400.93,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-05T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1126",
+    "order_id": "ORD-1126",
+    "customer_id": "CUS-1026",
+    "amount": 353.61,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-07T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1127",
+    "order_id": "ORD-1127",
+    "customer_id": "CUS-1027",
+    "amount": 453.73,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-06T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1128",
+    "order_id": "ORD-1128",
+    "customer_id": "CUS-1028",
+    "amount": 459.36,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-07T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1129",
+    "order_id": "ORD-1129",
+    "customer_id": "CUS-1029",
+    "amount": 305.81,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-08T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1130",
+    "order_id": "ORD-1130",
+    "customer_id": "CUS-1030",
+    "amount": 83.57,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-06T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1131",
+    "order_id": "ORD-1131",
+    "customer_id": "CUS-1031",
+    "amount": 109.91,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-18T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1132",
+    "order_id": "ORD-1132",
+    "customer_id": "CUS-1032",
+    "amount": 174.9,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-09T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1133",
+    "order_id": "ORD-1133",
+    "customer_id": "CUS-1033",
+    "amount": 283.0,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-08T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1134",
+    "order_id": "ORD-1134",
+    "customer_id": "CUS-1034",
+    "amount": 203.88,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-14T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1135",
+    "order_id": "ORD-1135",
+    "customer_id": "CUS-1035",
+    "amount": 179.81,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-01T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1136",
+    "order_id": "ORD-1136",
+    "customer_id": "CUS-1036",
+    "amount": 363.73,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-05T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1137",
+    "order_id": "ORD-1137",
+    "customer_id": "CUS-1037",
+    "amount": 125.92,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-16T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1138",
+    "order_id": "ORD-1138",
+    "customer_id": "CUS-1038",
+    "amount": 180.21,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-22T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1139",
+    "order_id": "ORD-1139",
+    "customer_id": "CUS-1039",
+    "amount": 333.46,
+    "status": "FAILED",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": "DECLINED_BY_ISSUER",
+    "created_at": "2026-08-27T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1140",
+    "order_id": "ORD-1140",
+    "customer_id": "CUS-1040",
+    "amount": 424.64,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-08-29T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1141",
+    "order_id": "ORD-1141",
+    "customer_id": "CUS-1041",
+    "amount": 289.23,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-15T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1142",
+    "order_id": "ORD-1142",
+    "customer_id": "CUS-1042",
+    "amount": 188.3,
+    "status": "SUCCESS",
+    "payment_method_type": "DIGITAL_WALLET",
+    "failure_reason": null,
+    "created_at": "2026-09-04T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1143",
+    "order_id": "ORD-1143",
+    "customer_id": "CUS-1043",
+    "amount": 347.76,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-30T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1144",
+    "order_id": "ORD-1144",
+    "customer_id": "CUS-1044",
+    "amount": 578.13,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-25T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1145",
+    "order_id": "ORD-1145",
+    "customer_id": "CUS-1045",
+    "amount": 195.18,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1146",
+    "order_id": "ORD-1146",
+    "customer_id": "CUS-1046",
+    "amount": 91.35,
+    "status": "FAILED",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": "INSUFFICIENT_FUNDS",
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1147",
+    "order_id": "ORD-1147",
+    "customer_id": "CUS-1047",
+    "amount": 131.31,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-13T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1148",
+    "order_id": "ORD-1148",
+    "customer_id": "CUS-1048",
+    "amount": 487.11,
+    "status": "SUCCESS",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-09-11T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1149",
+    "order_id": "ORD-1149",
+    "customer_id": "CUS-1049",
+    "amount": 32.85,
+    "status": "SUCCESS",
+    "payment_method_type": "CREDIT_CARD",
+    "failure_reason": null,
+    "created_at": "2026-08-26T12:00:00Z"
+  },
+  {
+    "payment_id": "PAY-1150",
+    "order_id": "ORD-1150",
+    "customer_id": "CUS-1050",
+    "amount": 332.11,
+    "status": "FAILED",
+    "payment_method_type": "DEBIT_CARD",
+    "failure_reason": "INSUFFICIENT_FUNDS",
+    "created_at": "2026-08-16T12:00:00Z"
+  }
+]
