@@ -6,7 +6,7 @@ payments, refunds, tickets) using canonical AcmeCommerce regex patterns.
 """
 
 import re
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from app.models.resolution import InvestigationRequest
 
 # Canonical identifier patterns
@@ -17,6 +17,19 @@ PATTERNS = {
     "refund_id": re.compile(r"\bREF-\d+\b", re.IGNORECASE),
     "ticket_id": re.compile(r"\b(TCK|ADV)-\d+\b", re.IGNORECASE),
 }
+
+
+def is_valid_identifier(entity_type: str, identifier: str) -> bool:
+    """
+    Validates whether an identifier string strictly matches the canonical pattern.
+    """
+    if not identifier or not isinstance(identifier, str):
+        return False
+    pattern = PATTERNS.get(entity_type)
+    if not pattern:
+        return False
+    clean = identifier.strip()
+    return bool(re.fullmatch(pattern.pattern, clean, re.IGNORECASE))
 
 
 def extract_identifiers(text: str) -> Dict[str, Optional[str]]:
@@ -32,7 +45,7 @@ def extract_identifiers(text: str) -> Dict[str, Optional[str]]:
         "ticket_id": None,
     }
 
-    if not text:
+    if not text or not isinstance(text, str):
         return results
 
     for key, pattern in PATTERNS.items():
@@ -43,10 +56,38 @@ def extract_identifiers(text: str) -> Dict[str, Optional[str]]:
     return results
 
 
+def extract_all_identifiers(text: str) -> Dict[str, List[str]]:
+    """
+    Extracts all distinct valid identifiers from text per entity type,
+    preserving the order in which they appear.
+    """
+    results: Dict[str, List[str]] = {
+        "order_id": [],
+        "customer_id": [],
+        "payment_id": [],
+        "refund_id": [],
+        "ticket_id": [],
+    }
+
+    if not text or not isinstance(text, str):
+        return results
+
+    for key, pattern in PATTERNS.items():
+        matches = pattern.findall(text)
+        seen = set()
+        for m in matches:
+            norm = m.upper()
+            if norm not in seen:
+                seen.add(norm)
+                results[key].append(norm)
+
+    return results
+
+
 def resolve_request_identifiers(request: InvestigationRequest) -> Dict[str, Optional[str]]:
     """
     Combines pre-structured request identifiers with entities extracted from the ticket text.
-    Explicit request fields take precedence over extracted matches.
+    Explicit request fields strictly take precedence over extracted matches.
     """
     extracted = extract_identifiers(request.ticket_text)
 
@@ -57,3 +98,4 @@ def resolve_request_identifiers(request: InvestigationRequest) -> Dict[str, Opti
         "refund_id": request.refund_id or extracted["refund_id"],
         "ticket_id": request.ticket_id or extracted["ticket_id"],
     }
+

@@ -271,3 +271,45 @@ async def test_tool_client_connection_error():
     assert "Connection failed" in str(exc_info.value)
     assert exc_info.value.status_code == 503
     await tool_client.close()
+
+
+@pytest.mark.asyncio
+async def test_tool_client_query_tools_success():
+    """Verifies that ToolClient successfully posts to query endpoint."""
+    def handler(request: httpx.Request):
+        assert request.url.path == "/api/v1/tools/query"
+        return httpx.Response(
+            200,
+            json={
+                "query": "Where is my order ORD-1001?",
+                "answer": "Order ORD-1001 was delivered.",
+                "tools_executed": [{"tool_name": "get_order"}],
+                "model": "qwen3:8b",
+                "duration_ms": 150.0,
+            },
+        )
+
+    mock_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    tool_client = ToolClient(base_url="http://test-tools", client=mock_client)
+
+    result = await tool_client.query_tools("Where is my order ORD-1001?")
+    assert result["answer"] == "Order ORD-1001 was delivered."
+    assert len(result["tools_executed"]) == 1
+    await tool_client.close()
+
+
+@pytest.mark.asyncio
+async def test_tool_client_query_tools_timeout():
+    """Verifies that ToolClient query_tools raises ServiceTimeoutError on timeout."""
+    def handler(request: httpx.Request):
+        raise httpx.ReadTimeout("Timeout exceeded")
+
+    mock_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    tool_client = ToolClient(base_url="http://test-tools", client=mock_client, timeout=2.0)
+
+    with pytest.raises(ServiceTimeoutError) as exc_info:
+        await tool_client.query_tools("Where is my order ORD-1001?")
+
+    assert "Tool Service" in str(exc_info.value)
+    assert exc_info.value.status_code == 504
+    await tool_client.close()

@@ -92,6 +92,31 @@ class ToolClient:
         """
         return await self._fetch_entity("refund", "/api/v1/tools/refunds", refund_id)
 
+    async def query_tools(self, query: str) -> Dict[str, Any]:
+        """
+        Submits query to Tool Service autonomous tool-calling agent endpoint.
+        """
+        url = f"{self.base_url}/api/v1/tools/query"
+        payload = {"query": query}
+        try:
+            resp = await self._client.post(url, json=payload)
+        except httpx.TimeoutException:
+            raise ServiceTimeoutError("Tool Service", self.timeout)
+        except (httpx.ConnectError, httpx.NetworkError) as err:
+            raise ServiceUnavailableError("Tool Service", f"Connection failed: {str(err)}")
+        except Exception as err:
+            raise ServiceUnavailableError("Tool Service", f"Unexpected client error: {str(err)}")
+
+        if resp.status_code != 200:
+            raise ServiceUnavailableError(
+                "Tool Service",
+                f"HTTP {resp.status_code}: {resp.text[:200]}",
+            )
+        try:
+            return resp.json()
+        except Exception as err:
+            raise ServiceUnavailableError("Tool Service", f"Invalid JSON response: {str(err)}")
+
     async def check_health(self) -> bool:
         """
         Pings Tool Service health probe.
