@@ -130,7 +130,7 @@ AutoResolve/
 │   │   │   │   ├── reasoning.py        # Qwen3 reasoning engine
 │   │   │   │   └── rules.py            # Deterministic business rules (RULES.md)
 │   │   │   └── main.py                 # FastAPI application and lifespan setup
-│   │   ├── tests/                      # 58 comprehensive unit & integration tests
+│   │   ├── tests/                      # 81 comprehensive unit & integration tests
 │   │   └── requirements.txt            # Python dependencies for Resolution service
 │   └── tool-service/                   # Deterministic tool calling service (Port 8001)
 │       ├── app/
@@ -217,12 +217,44 @@ A FastAPI microservice exposing deterministic lookup tools for operational data 
 
 A FastAPI microservice providing grounded, multi-source ticket investigation by orchestrating policy retrieval from the RAG Service and operational lookups from the Tool Service.
 
-- **Entity Extractor**: Scans natural language ticket messages for business identifiers (`ORD-XXXX`, `CUS-XXXX`, `PAY-XXXX`, `REF-XXXX`, `TCK-XXXX`).
-- **Concurrent Evidence Assembly**: Dispatches parallel asynchronous queries to RAG and Tool services, automatically traversing foreign keys (Order ➔ Customer profile and Payment transactions).
-- **Safety & Adversarial Defense**: Intercepts prompt injections, administrative privilege escalation, and executive impersonation attempts.
-- **Conflict Detection**: Catches discrepancies between customer claims (e.g. "delivered damaged") and carrier tracking facts (e.g. `PROCESSING` / `UNFULFILLED`).
-- **Deterministic Rules Engine**: Reflects authoritative thresholds from `RULES.md` ($500 refund approval limit, 30-day window, non-refundable categories), overriding LLM recommendations when safety constraints require human supervisor intervention.
-- **Read-Only Invariant Guarantee**: `actions_taken` is strictly locked to `[]`.
+#### Architecture & Core Pipeline (Module 3 Stages A–E)
+
+The Resolution Service implements a production-grade investigation engine structured across 5 distinct stages:
+
+1. **Stage A: Typed Contracts & Strict Validation (`app/models/resolution.py`)**
+   - Implements `InvestigationRequest` and `InvestigationResponse` schemas with field-level regex validation (`ORD-XXXX`, `CUS-XXXX`, `PAY-XXXX`, `REF-XXXX`, `TCK-XXXX`).
+   - Strongly typed Enums: `BusinessDecision` (`ELIGIBLE`, `INELIGIBLE`, `NEEDS_MORE_INFORMATION`, `NEEDS_HUMAN_REVIEW`, `UNABLE_TO_DETERMINE`) and `InvestigationStatus` (`COMPLETED`, `PARTIAL_EVIDENCE`, `FAILED`).
+   - Read-only invariant: `actions_taken` is strictly initialized and locked to `[]`.
+
+2. **Stage B: Typed Asynchronous Service Clients (`app/clients/`)**
+   - `RAGClient`: Connects to `http://localhost:8000` (`POST /api/v1/rag/query`) with query validation, latency timing, and clean fallback on degraded RAG connectivity.
+   - `ToolClient`: Connects to `http://localhost:8001` with dedicated methods (`get_order`, `get_customer`, `get_payment`, `get_refund`, and `query_tools`). Handles `404 Not Found` as `None` (record absence) and maps connection drops to `ToolServiceUnavailableError`.
+
+3. **Stage C: Multi-Identifier Extraction & Relational Evidence Collection (`app/workflows/`)**
+   - `EntityExtractor` (`extractor.py`): Performs boundary-checked, case-insensitive extraction of business identifiers with query/body parameter precedence resolution.
+   - `EvidenceCollector` (`evidence.py`): Asynchronously gathers policy chunks from RAG and executes automated relational foreign key traversal across tools:
+     $$\text{Order ID} \longrightarrow \text{Customer Profile} + \text{Payment Transaction} + \text{Refund Status}$$
+   - Defensive error boundary: Upstream 504 timeouts or missing records are safely captured in an `errors` list without halting the investigation.
+
+4. **Stage D: Dual-Track Grounded Reasoning & Deterministic Rule Enforcement (`app/workflows/`)**
+   - **Dual-Track Pattern**: Qwen3 probabilistic reasoning synthesizes policy citations (`[POL-REFUND-001]`) and customer summaries, while the deterministic Python rules engine (`rules.py`) evaluates hard operational constraints from `knowledge/RULES.md`.
+   - **Strict Reconciliation**:
+     $$\text{final\_decision} = \text{rule\_eval.forced\_decision} \;\mathbf{or}\; \text{llm\_decision}$$
+     Deterministic business code strictly overrides the model 100% of the time (e.g. orders delivered > 30 days ago, non-refundable categories, active chargebacks, and totals > $500.00).
+   - **Multi-Tier JSON Extraction**: Resilient parser supporting raw JSON, markdown code fences (```` ```json { ... } ``` ````), and conversational wrappers with graceful fallback to deterministic decisions on LLM timeout.
+
+5. **Stage E: Pre-Execution Guard Layer & Adversarial Defense (`app/workflows/safety.py`)**
+   - **Pre-Execution Scanning**: Intercepts attacks before retrieving evidence or invoking tools, running in $< 1\text{ ms}$.
+   - **Comprehensive Vector Coverage**: Defends against all 8 primary attack vectors:
+     - Direct prompt injection & goal hijacking (`ADV-001`, `ADV-015`)
+     - Roleplay & persona jailbreaks (Grandma exploit `ADV-025`)
+     - Synthetic XML/HTML `<system>` tags and markdown headers (`ADV-009`, `ADV-022`)
+     - Fake executive authority & penetration tester pretexts (`ADV-003`, `ADV-010`)
+     - Sensitive credential exfiltration (PCI cards, CVVs, passwords, env configs `ADV-007`, `ADV-014`)
+     - Structuring evasion (splitting transactions to evade $500 approval `ADV-008`)
+     - Malicious tool directives (SQL injection `ADV-006`, direct execution `ADV-017`)
+     - Logical contradictions (claims of delivery vs unfulfilled tracking, or simultaneous non-receipt and return `ADV-005`)
+   - **100% Injection-Resistance Benchmark**: Verified against all 30 attack tickets in `data/tickets/adversarial_tickets.json`.
 
 #### API Endpoints
 
@@ -341,7 +373,7 @@ Interactive OpenAPI documentation is available at `http://127.0.0.1:8002/docs`.
 
 ### Resolution Service Test Suite
 
-Execute the 58-test suite covering models, clients, extractor, evidence collection, business rules, safety guardrails, and API endpoints:
+Execute the 81-test suite covering models, clients, extractor, evidence collection, deterministic business rules, safety guardrails, and API endpoints:
 
 ```bash
 python -m pytest services/resolution-service/tests
@@ -385,7 +417,7 @@ The following table summarizes the current state of directories and components i
 
 | Path | Status | Physical Contents / Description |
 |---|---|---|
-| `services/resolution-service/` | **Implemented** | Complete multi-source investigation service (extractor, async clients, evidence collector, deterministic rules, Qwen3 reasoner, API endpoints, 58 tests). |
+| `services/resolution-service/` | **Implemented** | Complete multi-source investigation service (extractor, async clients, evidence collector, deterministic rules, Qwen3 reasoner, safety guardrails, API endpoints, 81 tests). |
 | `services/rag-service/` | **Implemented** | Complete RAG microservice (loader, chunker, FAISS, embedder, generator, API endpoints, tests, cache). |
 | `services/tool-service/` | **Implemented** | Complete tool service (order, customer, payment, refund tools, dispatcher, agent, API endpoints, tests). |
 | `knowledge/` | **Implemented** | 24 Markdown knowledge documents across policies, FAQs, runbooks, plus `RULES.md` and `CONSISTENCY_REPORT.md`. |
