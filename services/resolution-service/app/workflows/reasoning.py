@@ -116,7 +116,9 @@ class QwenReasoner:
         """
         # Step 1: Run deterministic business rules
         rule_eval = evaluate_order_rules(
-            evidence.operational_evidence.order, reference_date=reference_date
+            order=evidence.operational_evidence.order,
+            reference_date=reference_date,
+            refund=evidence.operational_evidence.refund,
         )
 
         # Step 2: Handle missing critical identifiers deterministically
@@ -139,6 +141,7 @@ class QwenReasoner:
         llm_decision = BusinessDecision.UNABLE_TO_DETERMINE
         summary = ""
         reasoning_summary = ""
+        llm_error = None
 
         prompt = self.build_prompt(evidence, customer_text)
         try:
@@ -162,8 +165,12 @@ class QwenReasoner:
                         llm_decision = BusinessDecision(raw_dec)
                     summary = parsed.get("summary", "")
                     reasoning_summary = parsed.get("reasoning_summary", "")
-        except Exception:
-            pass  # Handled safely by deterministic fallback below
+                else:
+                    llm_error = "LLM response did not contain parseable JSON."
+            else:
+                llm_error = f"LLM provider returned HTTP {resp.status_code}."
+        except Exception as exc:
+            llm_error = f"LLM inference unavailable ({type(exc).__name__}). Using deterministic rules."
 
         # Step 4: Reconcile LLM decision with Deterministic Rule Evaluation
         # DETERMINISTIC RULES ALWAYS OVERRIDE THE LLM
@@ -188,7 +195,10 @@ class QwenReasoner:
 
         # Compute technical investigation status
         status = InvestigationStatus.COMPLETED
-        if evidence.errors:
+        combined_errors = list(evidence.errors)
+        if llm_error:
+            combined_errors.append(llm_error)
+        if combined_errors:
             status = InvestigationStatus.PARTIAL_EVIDENCE
 
         return InvestigationResponse(
@@ -205,22 +215,38 @@ class QwenReasoner:
             ),
             review_reasons=rule_eval.review_reasons,
             actions_taken=[],  # Read-only investigation guarantee
-            errors=evidence.errors,
+            errors=combined_errors,
         )
 
     @staticmethod
     def _extract_json(text: str) -> Optional[Dict[str, Any]]:
-        """Safely extracts JSON from model response text or markdown code fences."""
+        """Safely extracts JSON from model response text, markdown fences, or embedded text."""
+        if not text:
+            return None
+
+        # 1. Direct parse attempt
         try:
-            return json.loads(text)
+            return json.loads(text.strip())
         except Exception:
-            # Look for ```json ... ``` blocks
-            match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
-            if match:
-                try:
-                    return json.loads(match.group(1))
-                except Exception:
-                    pass
+            pass
+
+        # 2. Look for ```json ... ``` or ``` ... ``` blocks
+        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except Exception:
+                pass
+
+        # 3. Fallback: match outermost curly braces
+        start = text.find("{")
+        end = text.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(text[start : end + 1])
+            except Exception:
+                pass
+
         return None
 
     async def close(self):

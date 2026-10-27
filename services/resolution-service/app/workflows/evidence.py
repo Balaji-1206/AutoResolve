@@ -64,22 +64,22 @@ class EvidenceCollector:
         rag_task = asyncio.create_task(self._fetch_rag_policy(request.ticket_text))
 
         order_task = (
-            asyncio.create_task(self.tool_client.get_order(ids["order_id"]))
+            asyncio.create_task(self._fetch_tool_safe(self.tool_client.get_order, "get_order", ids["order_id"]))
             if ids["order_id"]
             else None
         )
         customer_task = (
-            asyncio.create_task(self.tool_client.get_customer(ids["customer_id"]))
+            asyncio.create_task(self._fetch_tool_safe(self.tool_client.get_customer, "get_customer", ids["customer_id"]))
             if ids["customer_id"]
             else None
         )
         payment_task = (
-            asyncio.create_task(self.tool_client.get_payment(ids["payment_id"]))
+            asyncio.create_task(self._fetch_tool_safe(self.tool_client.get_payment, "get_payment", ids["payment_id"]))
             if ids["payment_id"]
             else None
         )
         refund_task = (
-            asyncio.create_task(self.tool_client.get_refund(ids["refund_id"]))
+            asyncio.create_task(self._fetch_tool_safe(self.tool_client.get_refund, "get_refund", ids["refund_id"]))
             if ids["refund_id"]
             else None
         )
@@ -88,15 +88,27 @@ class EvidenceCollector:
         rag_result, rag_error = await rag_task
         if rag_error:
             errors.append(rag_error)
+            missing_information.append("Policy evidence could not be retrieved due to service degradation.")
         elif rag_result:
             raw_rag = rag_result
+            if rag_result.get("status") == "OUT_OF_SCOPE":
+                missing_information.append("No matching company policy found in knowledge base.")
             policy_evidence = self._parse_policy_evidence(rag_result)
 
         # Await Initial Tools
-        order_record = await order_task if order_task else None
-        customer_record = await customer_task if customer_task else None
-        payment_record = await payment_task if payment_task else None
-        refund_record = await refund_task if refund_task else None
+        order_record, order_err = await order_task if order_task else (None, None)
+        customer_record, customer_err = await customer_task if customer_task else (None, None)
+        payment_record, payment_err = await payment_task if payment_task else (None, None)
+        refund_record, refund_err = await refund_task if refund_task else (None, None)
+
+        if order_err:
+            errors.append(order_err)
+        if customer_err:
+            errors.append(customer_err)
+        if payment_err:
+            errors.append(payment_err)
+        if refund_err:
+            errors.append(refund_err)
 
         # ----------------------------------------------------------------------
         # Phase 2: Process Order Evidence & Traverse Relational Links
@@ -109,14 +121,26 @@ class EvidenceCollector:
                 # Relational traversal: Discover customer_id if not previously known
                 if not customer_record and order_record.get("customer_id"):
                     cid = order_record["customer_id"]
-                    customer_record = await self.tool_client.get_customer(cid)
                     operational_evidence.tools_called.append("get_customer")
+                    rel_cust, rel_cust_err = await self._fetch_tool_safe(self.tool_client.get_customer, "get_customer", cid)
+                    if rel_cust_err:
+                        errors.append(rel_cust_err)
+                    else:
+                        customer_record = rel_cust
 
                 # Relational traversal: Discover payment_id if not previously known
                 if not payment_record and order_record.get("payment_id"):
                     pid = order_record["payment_id"]
-                    payment_record = await self.tool_client.get_payment(pid)
                     operational_evidence.tools_called.append("get_payment")
+                    rel_pay, rel_pay_err = await self._fetch_tool_safe(self.tool_client.get_payment, "get_payment", pid)
+                    if rel_pay_err:
+                        errors.append(rel_pay_err)
+                    else:
+                        payment_record = rel_pay
+            elif order_err:
+                missing_information.append(
+                    f"Order '{ids['order_id']}' details could not be retrieved due to service error."
+                )
             else:
                 missing_information.append(
                     f"Order '{ids['order_id']}' not found in operational records."
@@ -132,30 +156,48 @@ class EvidenceCollector:
             if "get_customer" not in operational_evidence.tools_called:
                 operational_evidence.tools_called.append("get_customer")
         elif ids["customer_id"]:
-            operational_evidence.tools_called.append("get_customer")
-            missing_information.append(
-                f"Customer '{ids['customer_id']}' not found in operational records."
-            )
+            if "get_customer" not in operational_evidence.tools_called:
+                operational_evidence.tools_called.append("get_customer")
+            if customer_err:
+                missing_information.append(
+                    f"Customer '{ids['customer_id']}' details could not be retrieved due to service error."
+                )
+            else:
+                missing_information.append(
+                    f"Customer '{ids['customer_id']}' not found in operational records."
+                )
 
         if payment_record:
             operational_evidence.payment = payment_record
             if "get_payment" not in operational_evidence.tools_called:
                 operational_evidence.tools_called.append("get_payment")
         elif ids["payment_id"]:
-            operational_evidence.tools_called.append("get_payment")
-            missing_information.append(
-                f"Payment '{ids['payment_id']}' not found in operational records."
-            )
+            if "get_payment" not in operational_evidence.tools_called:
+                operational_evidence.tools_called.append("get_payment")
+            if payment_err:
+                missing_information.append(
+                    f"Payment '{ids['payment_id']}' details could not be retrieved due to service error."
+                )
+            else:
+                missing_information.append(
+                    f"Payment '{ids['payment_id']}' not found in operational records."
+                )
 
         if refund_record:
             operational_evidence.refund = refund_record
             if "get_refund" not in operational_evidence.tools_called:
                 operational_evidence.tools_called.append("get_refund")
         elif ids["refund_id"]:
-            operational_evidence.tools_called.append("get_refund")
-            missing_information.append(
-                f"Refund '{ids['refund_id']}' not found in operational records."
-            )
+            if "get_refund" not in operational_evidence.tools_called:
+                operational_evidence.tools_called.append("get_refund")
+            if refund_err:
+                missing_information.append(
+                    f"Refund '{ids['refund_id']}' details could not be retrieved due to service error."
+                )
+            else:
+                missing_information.append(
+                    f"Refund '{ids['refund_id']}' not found in operational records."
+                )
 
         return CollectedEvidence(
             ticket_id=ticket_id,
@@ -165,6 +207,27 @@ class EvidenceCollector:
             errors=errors,
             raw_rag_response=raw_rag,
         )
+
+    async def _fetch_tool_safe(
+        self,
+        tool_func,
+        tool_name: str,
+        entity_id: str
+    ) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
+        """
+        Safely executes a Tool Service lookup, catching network faults and client exceptions.
+        Returns (record_or_None, error_message_or_None).
+        """
+        try:
+            record = await tool_func(entity_id)
+            return record, None
+        except MicroserviceError as err:
+            return None, f"Tool error ({tool_name} for '{entity_id}'): {str(err)}"
+        except ValueError as err:
+            return None, f"Invalid {tool_name} ID format '{entity_id}': {str(err)}"
+        except Exception as err:
+            return None, f"Unexpected error in {tool_name} for '{entity_id}': {str(err)}"
+
 
     async def _fetch_rag_policy(self, query: str) -> tuple[Optional[Dict[str, Any]], Optional[str]]:
         """Safely queries RAG service, catching communication errors."""
@@ -186,7 +249,7 @@ class EvidenceCollector:
         for cit in citations:
             doc_id = cit.get("document_id", "DOC-UNKNOWN")
             matching_chunk = retrieved_chunks.get(doc_id, {})
-            snippet = matching_chunk.get("snippet", cit.get("section", ""))
+            snippet = matching_chunk.get("snippet") or cit.get("section", "")
 
             items.append(
                 PolicyEvidenceItem(
@@ -200,4 +263,21 @@ class EvidenceCollector:
                 )
             )
 
+        # Fallback: if no citations were generated by LLM, but valid chunks were retrieved
+        if not items and "retrieved_chunks" in rag_result:
+            for chunk in rag_result.get("retrieved_chunks", []):
+                doc_id = chunk.get("document_id", "DOC-UNKNOWN")
+                items.append(
+                    PolicyEvidenceItem(
+                        document_id=doc_id,
+                        domain="general",
+                        authority="explanatory",
+                        section=chunk.get("section", "General"),
+                        source="",
+                        score=float(chunk.get("score", 0.0)),
+                        snippet=chunk.get("snippet", ""),
+                    )
+                )
+
         return items
+

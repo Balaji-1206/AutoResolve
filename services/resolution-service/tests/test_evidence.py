@@ -186,3 +186,179 @@ async def test_collect_evidence_rag_degraded():
     assert len(evidence.errors) == 1
     assert "Policy retrieval degraded" in evidence.errors[0]
     assert evidence.operational_evidence.order is not None
+
+
+@pytest.mark.asyncio
+async def test_collect_evidence_tool_service_timeout():
+    """Verifies that Tool Service timeout is recorded in errors without dropping policy evidence."""
+    def rag_handler(request: httpx.Request):
+        return httpx.Response(
+            200,
+            json={
+                "query": "refund",
+                "answer": "Policy allows refund within 30 days.",
+                "citations": [
+                    {
+                        "document_id": "POL-REFUND-001",
+                        "domain": "refunds",
+                        "authority": "authoritative",
+                        "section": "Overview",
+                        "source": "knowledge/policies/refund_policy.md",
+                        "score": 0.85,
+                        "explicitly_cited": True,
+                    }
+                ],
+                "retrieved_chunks": [],
+                "status": "SUCCESS",
+            },
+        )
+
+    def tool_handler(request: httpx.Request):
+        raise httpx.ReadTimeout("Tool server timed out")
+
+    rag_client = RAGClient(base_url="http://mock-rag", client=httpx.AsyncClient(transport=httpx.MockTransport(rag_handler)))
+    tool_client = ToolClient(base_url="http://mock-tools", client=httpx.AsyncClient(transport=httpx.MockTransport(tool_handler)), timeout=1.0)
+
+    collector = EvidenceCollector(rag_client=rag_client, tool_client=tool_client)
+
+    request = InvestigationRequest(ticket_text="Can I return order ORD-1001?")
+    evidence = await collector.collect_evidence(request)
+
+    assert len(evidence.policy_evidence) == 1
+    assert evidence.policy_evidence[0].document_id == "POL-REFUND-001"
+    assert evidence.operational_evidence.order is None
+    assert any("Tool error" in err for err in evidence.errors)
+    assert any("could not be retrieved due to service error" in m for m in evidence.missing_information)
+
+
+@pytest.mark.asyncio
+async def test_collect_evidence_relational_failure_preserves_order():
+    """Verifies that a failure during relational traversal (e.g. customer lookup 500) preserves the order."""
+    def rag_handler(request: httpx.Request):
+        return httpx.Response(200, json={"query": "refund", "citations": [], "status": "SUCCESS"})
+
+    def tool_handler(request: httpx.Request):
+        path = request.url.path
+        if "/orders/ORD-1001" in path:
+            return httpx.Response(
+                200,
+                json={"order_id": "ORD-1001", "customer_id": "CUS-1001", "status": "DELIVERED"},
+            )
+        elif "/customers/CUS-1001" in path:
+            return httpx.Response(500, text="Database error fetching customer")
+        return httpx.Response(404)
+
+    rag_client = RAGClient(base_url="http://mock-rag", client=httpx.AsyncClient(transport=httpx.MockTransport(rag_handler)))
+    tool_client = ToolClient(base_url="http://mock-tools", client=httpx.AsyncClient(transport=httpx.MockTransport(tool_handler)))
+
+    collector = EvidenceCollector(rag_client=rag_client, tool_client=tool_client)
+
+    request = InvestigationRequest(ticket_text="Order ORD-1001 return request.")
+    evidence = await collector.collect_evidence(request)
+
+    assert evidence.operational_evidence.order is not None
+    assert evidence.operational_evidence.order["order_id"] == "ORD-1001"
+    assert evidence.operational_evidence.customer is None
+    assert any("Tool error (get_customer" in err for err in evidence.errors)
+    assert "get_order" in evidence.operational_evidence.tools_called
+    assert "get_customer" in evidence.operational_evidence.tools_called
+
+
+@pytest.mark.asyncio
+async def test_collect_evidence_multiple_supported_ids():
+    """Verifies evidence collection when multiple IDs (order, customer, payment, refund) are in ticket."""
+    def rag_handler(request: httpx.Request):
+        return httpx.Response(200, json={"query": "test", "citations": [], "status": "SUCCESS"})
+
+    def tool_handler(request: httpx.Request):
+        path = request.url.path
+        if "/orders/ORD-1001" in path:
+            return httpx.Response(200, json={"order_id": "ORD-1001", "status": "DELIVERED"})
+        elif "/customers/CUS-1001" in path:
+            return httpx.Response(200, json={"customer_id": "CUS-1001", "name": "Elena Chen"})
+        elif "/payments/PAY-1001" in path:
+            return httpx.Response(200, json={"payment_id": "PAY-1001", "status": "SUCCESS"})
+        elif "/refunds/REF-1001" in path:
+            return httpx.Response(200, json={"refund_id": "REF-1001", "status": "COMPLETED"})
+        return httpx.Response(404)
+
+    rag_client = RAGClient(base_url="http://mock-rag", client=httpx.AsyncClient(transport=httpx.MockTransport(rag_handler)))
+    tool_client = ToolClient(base_url="http://mock-tools", client=httpx.AsyncClient(transport=httpx.MockTransport(tool_handler)))
+
+    collector = EvidenceCollector(rag_client=rag_client, tool_client=tool_client)
+
+    request = InvestigationRequest(
+        ticket_text="Customer CUS-1001 asking about ORD-1001 with PAY-1001 and refund REF-1001."
+    )
+    evidence = await collector.collect_evidence(request)
+
+    assert evidence.operational_evidence.order["order_id"] == "ORD-1001"
+    assert evidence.operational_evidence.customer["customer_id"] == "CUS-1001"
+    assert evidence.operational_evidence.payment["payment_id"] == "PAY-1001"
+    assert evidence.operational_evidence.refund["refund_id"] == "REF-1001"
+    assert set(evidence.operational_evidence.tools_called) == {"get_order", "get_customer", "get_payment", "get_refund"}
+    assert len(evidence.missing_information) == 0
+
+
+@pytest.mark.asyncio
+async def test_collect_evidence_explicit_request_ids():
+    """Verifies that explicitly passed request IDs take precedence and are used for lookups."""
+    def rag_handler(request: httpx.Request):
+        return httpx.Response(200, json={"query": "test", "citations": [], "status": "SUCCESS"})
+
+    def tool_handler(request: httpx.Request):
+        path = request.url.path
+        if "/orders/ORD-2002" in path:
+            return httpx.Response(200, json={"order_id": "ORD-2002", "status": "SHIPPED"})
+        elif "/orders/ORD-1001" in path:
+            return httpx.Response(200, json={"order_id": "ORD-1001", "status": "DELIVERED"})
+        return httpx.Response(404)
+
+    rag_client = RAGClient(base_url="http://mock-rag", client=httpx.AsyncClient(transport=httpx.MockTransport(rag_handler)))
+    tool_client = ToolClient(base_url="http://mock-tools", client=httpx.AsyncClient(transport=httpx.MockTransport(tool_handler)))
+
+    collector = EvidenceCollector(rag_client=rag_client, tool_client=tool_client)
+
+    request = InvestigationRequest(
+        ticket_text="My message mentions ORD-1001 by mistake.",
+        order_id="ORD-2002",
+    )
+    evidence = await collector.collect_evidence(request)
+
+    assert evidence.operational_evidence.order is not None
+    assert evidence.operational_evidence.order["order_id"] == "ORD-2002"
+    assert evidence.operational_evidence.order["status"] == "SHIPPED"
+
+
+@pytest.mark.asyncio
+async def test_collect_evidence_rag_out_of_scope_no_citations():
+    """Verifies that RAG OUT_OF_SCOPE does not fabricate citations and documents missing policy."""
+    def rag_handler(request: httpx.Request):
+        return httpx.Response(
+            200,
+            json={
+                "query": "Who is the president?",
+                "answer": "This inquiry is out of scope.",
+                "citations": [],
+                "retrieved_chunks": [],
+                "is_grounded": False,
+                "status": "OUT_OF_SCOPE",
+            },
+        )
+
+    def tool_handler(request: httpx.Request):
+        return httpx.Response(200, json={"order_id": "ORD-1001", "status": "DELIVERED"})
+
+    rag_client = RAGClient(base_url="http://mock-rag", client=httpx.AsyncClient(transport=httpx.MockTransport(rag_handler)))
+    tool_client = ToolClient(base_url="http://mock-tools", client=httpx.AsyncClient(transport=httpx.MockTransport(tool_handler)))
+
+    collector = EvidenceCollector(rag_client=rag_client, tool_client=tool_client)
+
+    request = InvestigationRequest(ticket_text="Out of scope question about ORD-1001.")
+    evidence = await collector.collect_evidence(request)
+
+    assert len(evidence.policy_evidence) == 0
+    assert any("No matching company policy" in m for m in evidence.missing_information)
+    assert evidence.operational_evidence.order is not None
+
+

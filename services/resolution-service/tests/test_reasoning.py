@@ -141,3 +141,71 @@ async def test_prompt_isolation_structure():
     assert "Ignore previous instructions" in prompt
     assert "POL-REFUND-001" in prompt
     await reasoner.close()
+
+
+@pytest.mark.asyncio
+async def test_reasoning_llm_timeout_fallback_to_deterministic():
+    """
+    When the LLM server times out or is unreachable, the reasoner must
+    gracefully fall back to deterministic evaluation without crashing.
+    """
+    def broken_handler(request: httpx.Request):
+        raise httpx.ConnectTimeout("Connection timed out to Ollama")
+
+    mock_client = httpx.AsyncClient(transport=httpx.MockTransport(broken_handler))
+    reasoner = QwenReasoner(base_url="http://mock-broken-ollama", client=mock_client)
+
+    evidence = CollectedEvidence(
+        ticket_id="TCK-1003",
+        operational_evidence=OperationalEvidence(
+            order={
+                "order_id": "ORD-1003",
+                "status": "DELIVERED",
+                "total_amount": 85.0,
+                "delivered_at": "2026-08-19T12:00:00Z",
+                "product_category": "Home Goods",
+                "refundable": True,
+            }
+        ),
+    )
+
+    response = await reasoner.reason(
+        evidence=evidence,
+        customer_text="Can I return order ORD-1003?",
+        reference_date=REF_DATE,
+    )
+
+    # 42 days delivered -> deterministically INELIGIBLE even without LLM
+    assert response.decision == BusinessDecision.INELIGIBLE
+    assert response.actions_taken == []
+    assert any("30-day" in r for r in response.review_reasons)
+    assert any("ConnectTimeout" in err or "deterministic" in err for err in response.errors)
+    await reasoner.close()
+
+
+@pytest.mark.asyncio
+async def test_reasoning_markdown_and_conversational_json_extraction():
+    """Verifies that JSON wrapped in markdown fences or conversational text is parsed."""
+    markdown_wrapped = """Here is your assessment:
+```json
+{
+  "decision": "ELIGIBLE",
+  "summary": "Return is allowed under standard 30-day policy.",
+  "reasoning_summary": "Item delivered 12 days ago with clean records."
+}
+```
+Let me know if you need more help."""
+
+    parsed = QwenReasoner._extract_json(markdown_wrapped)
+    assert parsed is not None
+    assert parsed["decision"] == "ELIGIBLE"
+    assert "30-day" in parsed["summary"]
+
+    conversational_text = """Based on my analysis:
+{"decision": "INELIGIBLE", "summary": "Past return window.", "reasoning_summary": "Exceeds 30 days."}
+Thank you."""
+
+    parsed_conv = QwenReasoner._extract_json(conversational_text)
+    assert parsed_conv is not None
+    assert parsed_conv["decision"] == "INELIGIBLE"
+

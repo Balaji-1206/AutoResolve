@@ -89,3 +89,74 @@ def test_active_chargeback_hold_blocks_refund():
     assert result.requires_human_review is True
     assert any("chargeback" in r.lower() for r in result.review_reasons)
     assert "POL-DISPUTE-001" in result.citations
+
+
+def test_duplicate_refund_prevention_status_refunded():
+    """Duplicate refund blocked when order status is REFUNDED."""
+    order = {
+        "order_id": "ORD-1099",
+        "status": "REFUNDED",
+        "total_amount": 50.0,
+        "delivered_at": "2026-09-20T12:00:00Z",
+        "product_category": "Apparel",
+        "refundable": True,
+    }
+    result = evaluate_order_rules(order, reference_date=REF_DATE)
+    assert result.forced_decision == BusinessDecision.INELIGIBLE
+    assert any("already been refunded" in r.lower() for r in result.review_reasons)
+    assert "POL-REFUND-001" in result.citations
+
+
+def test_duplicate_refund_prevention_existing_refund_record():
+    """Duplicate refund blocked when operational refund record is COMPLETED."""
+    order = {
+        "order_id": "ORD-1098",
+        "status": "DELIVERED",
+        "total_amount": 50.0,
+        "delivered_at": "2026-09-20T12:00:00Z",
+        "product_category": "Apparel",
+        "refundable": True,
+    }
+    refund = {
+        "refund_id": "REF-1098",
+        "status": "COMPLETED",
+        "amount": 50.0,
+    }
+    result = evaluate_order_rules(order, reference_date=REF_DATE, refund=refund)
+    assert result.forced_decision == BusinessDecision.INELIGIBLE
+    assert any("already been refunded" in r.lower() for r in result.review_reasons)
+
+
+def test_boundary_delivery_window_exact_30_days():
+    """Delivered exactly 30 days ago is within the refund window."""
+    order = {
+        "order_id": "ORD-1030",
+        "status": "DELIVERED",
+        "total_amount": 100.0,
+        "delivered_at": "2026-08-31T12:00:00Z",
+        "product_category": "Apparel",
+        "refundable": True,
+    }
+    result = evaluate_order_rules(order, reference_date=REF_DATE)
+    assert result.forced_decision is None
+
+
+def test_boundary_delivery_window_31_days():
+    """Delivered 31 days ago exceeds the 30-day window and is INELIGIBLE."""
+    order = {
+        "order_id": "ORD-1031",
+        "status": "DELIVERED",
+        "total_amount": 100.0,
+        "delivered_at": "2026-08-30T12:00:00Z",
+        "product_category": "Apparel",
+        "refundable": True,
+    }
+    result = evaluate_order_rules(order, reference_date=REF_DATE)
+    assert result.forced_decision == BusinessDecision.INELIGIBLE
+    assert any("30-day" in r for r in result.review_reasons)
+
+
+def test_empty_order_resilience():
+    """Empty or None order does not crash the rules engine."""
+    assert evaluate_order_rules(None).forced_decision is None
+    assert evaluate_order_rules({}).forced_decision is None
