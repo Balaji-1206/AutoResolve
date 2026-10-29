@@ -5,6 +5,7 @@ Connects to Tool Service endpoints (default: http://localhost:8001)
 to perform deterministic lookups for orders, customers, payments, and refunds.
 """
 
+import asyncio
 import os
 from typing import Any, Dict, Optional
 import httpx
@@ -21,11 +22,13 @@ class ToolClient:
         base_url: Optional[str] = None,
         timeout: float = 10.0,
         client: Optional[httpx.AsyncClient] = None,
+        max_retries: int = 1,
     ):
         self.base_url = (
             base_url or os.getenv("TOOL_SERVICE_URL", "http://localhost:8001")
         ).rstrip("/")
         self.timeout = timeout
+        self.max_retries = max_retries
         self._owns_client = client is None
         self._client = client or httpx.AsyncClient(
             timeout=httpx.Timeout(connect=5.0, read=timeout, write=5.0, pool=5.0)
@@ -39,30 +42,44 @@ class ToolClient:
     ) -> Optional[Dict[str, Any]]:
         """
         Internal dispatcher handling HTTP requests, 404 not found, and connection failures.
+        Performs bounded retries on transient connection or timeout faults.
         """
         url = f"{self.base_url}{path}/{identifier}"
 
-        try:
-            resp = await self._client.get(url)
-        except httpx.TimeoutException:
-            raise ServiceTimeoutError("Tool Service", self.timeout)
-        except (httpx.ConnectError, httpx.NetworkError) as err:
-            raise ServiceUnavailableError("Tool Service", f"Connection failed: {str(err)}")
-        except Exception as err:
-            raise ServiceUnavailableError("Tool Service", f"Unexpected client error: {str(err)}")
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                resp = await self._client.get(url)
+                if resp.status_code == 200:
+                    return resp.json()
+                elif resp.status_code == 404:
+                    # Expected operational outcome: Entity does not exist in dataset (never retry 404)
+                    return None
+                elif resp.status_code == 400:
+                    # Malformed identifier format (never retry 400)
+                    raise ValueError(f"Malformed {entity_name} identifier '{identifier}': {resp.text}")
+                elif resp.status_code >= 500 and attempt < self.max_retries:
+                    await asyncio.sleep(0.05 * (attempt + 1))
+                    continue
+                else:
+                    raise ServiceUnavailableError(
+                        "Tool Service",
+                        f"HTTP {resp.status_code} fetching {entity_name} '{identifier}': {resp.text[:200]}",
+                    )
+            except httpx.TimeoutException:
+                last_error = ServiceTimeoutError("Tool Service", self.timeout)
+            except (httpx.ConnectError, httpx.NetworkError) as err:
+                last_error = ServiceUnavailableError("Tool Service", f"Connection failed: {str(err)}")
+            except (ValueError, ServiceUnavailableError):
+                raise
+            except Exception as err:
+                last_error = ServiceUnavailableError("Tool Service", f"Unexpected client error: {str(err)}")
 
-        if resp.status_code == 200:
-            return resp.json()
-        elif resp.status_code == 404:
-            # Expected operational outcome: Entity does not exist in dataset
-            return None
-        elif resp.status_code == 400:
-            raise ValueError(f"Malformed {entity_name} identifier '{identifier}': {resp.text}")
-        else:
-            raise ServiceUnavailableError(
-                "Tool Service",
-                f"HTTP {resp.status_code} fetching {entity_name} '{identifier}': {resp.text[:200]}",
-            )
+            if attempt < self.max_retries:
+                await asyncio.sleep(0.05 * (attempt + 1))
+
+        if last_error:
+            raise last_error
 
     async def get_order(self, order_id: str) -> Optional[Dict[str, Any]]:
         """

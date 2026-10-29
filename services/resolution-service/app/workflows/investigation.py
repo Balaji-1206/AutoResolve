@@ -1,13 +1,13 @@
 """
 Master Ticket Investigation Workflow for AutoResolve AI.
 
-Integrates identifier extraction, evidence collection (RAG + Tools),
-adversarial defense, conflict detection, deterministic business rules,
-and grounded Qwen3 reasoning into a single robust pipeline.
+Integrates the compiled LangGraph orchestration engine into the Resolution Service,
+connecting safety checks, entity extraction, evidence collection (RAG + Tools),
+conflict detection, grounded Qwen3 reasoning, and deterministic business rules.
 """
 
 import time
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 from app.clients.rag_client import RAGClient
 from app.clients.tool_client import ToolClient
 from app.models.resolution import (
@@ -16,14 +16,14 @@ from app.models.resolution import (
     InvestigationResponse,
     InvestigationStatus,
 )
-from app.workflows.evidence import EvidenceCollector
+from app.workflows.graph import create_resolution_graph
 from app.workflows.reasoning import QwenReasoner
-from app.workflows.safety import check_evidence_conflicts, detect_adversarial_patterns
+from app.workflows.state import create_initial_state
 
 
 class InvestigationWorkflow:
     """
-    End-to-end investigation orchestrator.
+    End-to-end investigation orchestrator powered by LangGraph.
     """
 
     def __init__(
@@ -31,70 +31,38 @@ class InvestigationWorkflow:
         rag_client: RAGClient,
         tool_client: ToolClient,
         reasoner: Optional[QwenReasoner] = None,
+        checkpointer: Any = None,
     ):
         self.rag_client = rag_client
         self.tool_client = tool_client
-        self.evidence_collector = EvidenceCollector(rag_client, tool_client)
         self.reasoner = reasoner or QwenReasoner()
+        self.checkpointer = checkpointer
+        self.graph = create_resolution_graph(
+            rag_client=self.rag_client,
+            tool_client=self.tool_client,
+            reasoner=self.reasoner,
+            checkpointer=self.checkpointer,
+        )
 
     async def investigate(
         self,
         request: InvestigationRequest,
         reference_date: Optional[Any] = None,
+        config: Optional[Dict[str, Any]] = None,
     ) -> InvestigationResponse:
         """
-        Executes end-to-end investigation with safety and failure handling.
+        Executes end-to-end investigation orchestrated via the compiled LangGraph.
+        Catches any unexpected technical faults to ensure a global fail-safe boundary.
         """
         t0 = time.time()
-
-        # Step 1: Scan for adversarial attacks / prompt injection
-        adversarial_threats = detect_adversarial_patterns(request.ticket_text)
-        if adversarial_threats:
-            dt = round((time.time() - t0) * 1000, 2)
-            return InvestigationResponse(
-                ticket_id=request.ticket_id,
-                status=InvestigationStatus.COMPLETED,
-                decision=BusinessDecision.NEEDS_HUMAN_REVIEW,
-                summary="Your inquiry has been routed to a senior operations supervisor for manual review.",
-                reasoning_summary="Security alert: Unauthorized system override or administrative privilege claim detected in ticket text.",
-                requires_human_review=True,
-                review_reasons=adversarial_threats,
-                actions_taken=[],
-                duration_ms=dt,
-            )
-
         try:
-            # Step 2: Gather Evidence across RAG and Tools
-            evidence = await self.evidence_collector.collect_evidence(request)
-
-            # Step 3: Check for logical contradictions between claims and operational facts
-            conflicts = check_evidence_conflicts(
-                request.ticket_text, evidence.operational_evidence.order
-            )
-
-            # Step 4: Perform Grounded Reasoning and Apply Deterministic Rules
-            response = await self.reasoner.reason(
-                evidence=evidence,
-                customer_text=request.ticket_text,
-                reference_date=reference_date,
-            )
-
-            # Step 5: Incorporate conflict findings
-            if conflicts:
-                response.requires_human_review = True
-                response.review_reasons.extend(conflicts)
-                response.decision = BusinessDecision.NEEDS_HUMAN_REVIEW
-                response.summary = (
-                    "Your inquiry requires verification by a support agent due to a discrepancy between your message and our tracking records."
-                )
-
-            # Step 6: Final Invariant Enforcements
-            response.actions_taken = []  # Read-only invariant guarantee
-            response.duration_ms = round((time.time() - t0) * 1000, 2)
+            init_state = create_initial_state(request, reference_date=reference_date)
+            final_state = await self.graph.ainvoke(init_state, config=config)
+            response = final_state.get("final_response")
+            if not response:
+                raise RuntimeError("Graph execution finished without generating final_response.")
             return response
-
         except Exception as err:
-            # Global Fail-Safe Boundary: Never crash or expose internal stack traces
             dt = round((time.time() - t0) * 1000, 2)
             return InvestigationResponse(
                 ticket_id=request.ticket_id,

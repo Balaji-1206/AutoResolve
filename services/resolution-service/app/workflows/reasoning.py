@@ -105,39 +105,15 @@ class QwenReasoner:
             f"Provide your JSON evaluation according to the system rules."
         )
 
-    async def reason(
+    async def synthesize(
         self,
         evidence: CollectedEvidence,
         customer_text: str,
-        reference_date: Optional[Any] = None,
-    ) -> InvestigationResponse:
+    ) -> tuple[BusinessDecision, str, str, Optional[str]]:
         """
-        Synthesizes evidence using Qwen3 and applies deterministic safety overrides.
+        Executes Qwen3 prompt inference to synthesize evidence.
+        Returns (llm_decision, summary, reasoning_summary, error_or_None).
         """
-        # Step 1: Run deterministic business rules
-        rule_eval = evaluate_order_rules(
-            order=evidence.operational_evidence.order,
-            reference_date=reference_date,
-            refund=evidence.operational_evidence.refund,
-        )
-
-        # Step 2: Handle missing critical identifiers deterministically
-        if any("Order identifier" in m for m in evidence.missing_information):
-            return InvestigationResponse(
-                ticket_id=evidence.ticket_id,
-                status=InvestigationStatus.COMPLETED,
-                decision=BusinessDecision.NEEDS_MORE_INFORMATION,
-                summary="Please provide your unique Order ID (format: ORD-XXXX) so we can review your request.",
-                reasoning_summary="No valid order identifier was provided in the ticket or request parameters.",
-                policy_evidence=evidence.policy_evidence,
-                operational_evidence=evidence.operational_evidence,
-                missing_information=evidence.missing_information,
-                requires_human_review=False,
-                actions_taken=[],
-                errors=evidence.errors,
-            )
-
-        # Step 3: Query Qwen3 for synthesis
         llm_decision = BusinessDecision.UNABLE_TO_DETERMINE
         summary = ""
         reasoning_summary = ""
@@ -171,6 +147,45 @@ class QwenReasoner:
                 llm_error = f"LLM provider returned HTTP {resp.status_code}."
         except Exception as exc:
             llm_error = f"LLM inference unavailable ({type(exc).__name__}). Using deterministic rules."
+
+        return llm_decision, summary, reasoning_summary, llm_error
+
+    async def reason(
+        self,
+        evidence: CollectedEvidence,
+        customer_text: str,
+        reference_date: Optional[Any] = None,
+    ) -> InvestigationResponse:
+        """
+        Synthesizes evidence using Qwen3 and applies deterministic safety overrides.
+        """
+        # Step 1: Run deterministic business rules
+        rule_eval = evaluate_order_rules(
+            order=evidence.operational_evidence.order,
+            reference_date=reference_date,
+            refund=evidence.operational_evidence.refund,
+        )
+
+        # Step 2: Handle missing critical identifiers deterministically
+        if any("Order identifier" in m for m in evidence.missing_information):
+            return InvestigationResponse(
+                ticket_id=evidence.ticket_id,
+                status=InvestigationStatus.COMPLETED,
+                decision=BusinessDecision.NEEDS_MORE_INFORMATION,
+                summary="Please provide your unique Order ID (format: ORD-XXXX) so we can review your request.",
+                reasoning_summary="No valid order identifier was provided in the ticket or request parameters.",
+                policy_evidence=evidence.policy_evidence,
+                operational_evidence=evidence.operational_evidence,
+                missing_information=evidence.missing_information,
+                requires_human_review=False,
+                actions_taken=[],
+                errors=evidence.errors,
+            )
+
+        # Step 3: Query Qwen3 for synthesis
+        llm_decision, summary, reasoning_summary, llm_error = await self.synthesize(
+            evidence, customer_text
+        )
 
         # Step 4: Reconcile LLM decision with Deterministic Rule Evaluation
         # DETERMINISTIC RULES ALWAYS OVERRIDE THE LLM

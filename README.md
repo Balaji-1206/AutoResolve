@@ -14,13 +14,16 @@ AutoResolve AI is an autonomous customer support and operations resolution platf
   - [1. RAG Service (`services/rag-service`)](#1-rag-service-servicesrag-service)
   - [2. Tool Service (`services/tool-service`)](#2-tool-service-servicestool-service)
   - [3. Resolution Service (`services/resolution-service`)](#3-resolution-service-servicesresolution-service)
+    - [LangGraph Orchestration Engine](#langgraph-orchestration-engine)
 - [Knowledge Base & Operational Data](#knowledge-base--operational-data)
-  - [Knowledge Base (`knowledge/`)](#knowledge-base-knowledge)
-  - [Synthetic Datasets (`data/`)](#synthetic-datasets-data)
+- [Knowledge Base (`knowledge/`)](#knowledge-base-knowledge)
+- [Synthetic Datasets (`data/`)](#synthetic-datasets-data)
 - [Scripts & Automation (`scripts/`)](#scripts--automation-scripts)
 - [Environment & Dependencies](#environment--dependencies)
 - [Running Locally](#running-locally)
 - [Running Tests](#running-tests)
+- [Architectural Limitations & Future Roadmap](#architectural-limitations--future-roadmap)
+- [Resume & Portfolio Project Description](#resume--portfolio-project-description)
 - [Repository Status & Implementation Inventory](#repository-status--implementation-inventory)
 
 ---
@@ -256,6 +259,106 @@ The Resolution Service implements a production-grade investigation engine struct
      - Logical contradictions (claims of delivery vs unfulfilled tracking, or simultaneous non-receipt and return `ADV-005`)
    - **100% Injection-Resistance Benchmark**: Verified against all 30 attack tickets in `data/tickets/adversarial_tickets.json`.
 
+#### LangGraph Orchestration Engine (Module 4)
+
+The investigation pipeline is orchestrated via a compiled **LangGraph StateGraph** (`app/workflows/graph.py`), replacing procedural execution with an explicit, stateful, and interruptible state machine.
+
+##### Why LangGraph Was Introduced (vs. Plain Python)
+- **State Machine Isolation**: Procedural Python passes mutable arguments through nested functions. LangGraph enforces a single typed shared state dictionary (`InvestigationState`) where each node has explicit read/write boundaries.
+- **Declarative Conditional Routing**: Branching logic (e.g. security short-circuits vs. normal paths) is separated into routing edges rather than tangled `if/else` ladders.
+- **Durable Checkpointing & Pauses**: LangGraph allows high-risk investigations (e.g., refunds $> \$500$) to pause execution (`interrupt_before`), snapshot state to storage (`MemorySaver`), and resume days later when a supervisor submits approval, without writing custom database state-tracking machines.
+- **Resilient Degradation**: Partial failures (e.g. RAG service degradation) are contained; valid operational evidence is retained, and deterministic business rules evaluate whatever facts remain.
+
+##### Graph Execution Topology
+
+```mermaid
+flowchart TD
+    START([START]) --> safety_check[Node: safety_check]
+    
+    safety_check --> route_safety{route_after_safety}
+    
+    route_safety -- "Threat Detected (is_safe == False)" --> escalate_threat[Node: escalate_threat]
+    escalate_threat --> END([END])
+    
+    route_safety -- "Clean Ticket (is_safe == True)" --> extract_entities[Node: extract_entities]
+    extract_entities --> collect_evidence[Node: collect_evidence]
+    collect_evidence --> reason_over_evidence[Node: reason_over_evidence]
+    reason_over_evidence --> apply_business_rules[Node: apply_business_rules]
+    
+    apply_business_rules --> route_rules{route_after_rules}
+    
+    route_rules -- "Requires Review & Checkpointer Present" --> human_review[Node: human_review / interrupt]
+    route_rules -- "Standard Outcome / Stateless" --> finalize_response[Node: finalize_response]
+    
+    human_review --> finalize_response
+    finalize_response --> END
+```
+
+##### Node Responsibilities & Invariants
+
+| Node | Input Keys | Output Keys | Core Responsibility & Safety Guarantees |
+|---|---|---|---|
+| `safety_check` | `ticket_text` | `is_safe`, `safety_threats` | Scans text for 8 adversarial vectors. Runs in $< 1\text{ ms}$. |
+| `escalate_threat` | `safety_threats`, `ticket_id` | `decision`, `final_response`, `duration_ms` | **Security Short-Circuit**: Routes directly to `END`. Downstream tools and LLMs are called **0 times**. |
+| `extract_entities` | `ticket_text`, inbound IDs | `extracted_entities`, normalized IDs | Boundary-checked regex extraction; explicit request fields strictly take precedence. |
+| `collect_evidence` | resolved IDs, `ticket_text` | `policy_evidence`, `operational_evidence`, `errors`, `missing_information`, `conflicts` | Dispatches parallel calls to RAG (Port 8000) and Tools (Port 8001); traverses Order $\rightarrow$ Customer + Payment. Detects factual contradictions. |
+| `reason_over_evidence`| `policy_evidence`, `operational_evidence`, `missing_information` | `llm_decision`, `summary`, `reasoning_summary` | If order ID is missing, emits `NEEDS_MORE_INFORMATION`. Otherwise prompts Qwen3 for synthesis with citations. |
+| `apply_business_rules` | `operational_evidence`, `reference_date`, `conflicts` | `decision`, `rule_forced_decision`, `requires_human_review`, `review_reasons` | **Deterministic Override**: `RULES.md` overrides LLM 100% of the time (30-day window, non-refundable catalog, active chargeback hold, $> \$500$ threshold). Prevents false `ELIGIBLE` decisions if tool is degraded. |
+| `human_review` | `requires_human_review`, `supervisor_review` | `decision`, `summary`, `supervisor_review`, `requires_human_review` | **Durable Pause**: Halts execution before node via checkpointer. Validates supervisor action (`APPROVE`/`REJECT`). Rejects customer-forged input. |
+| `finalize_response` | all state keys | `final_response`, `status`, `duration_ms` | Assembles public `InvestigationResponse`. Enforces read-only invariant (`actions_taken = []`). Sets `COMPLETED` or `PARTIAL_EVIDENCE`. |
+
+##### Typed Shared State Model (`InvestigationState`)
+
+```python
+class InvestigationState(TypedDict, total=False):
+    # 1. Inbound Request & Identifiers
+    ticket_text: str
+    ticket_id: Optional[str]
+    customer_id: Optional[str]
+    order_id: Optional[str]
+    payment_id: Optional[str]
+    refund_id: Optional[str]
+    reference_date: Optional[datetime]
+
+    # 2. Safety & Threat Findings
+    is_safe: bool
+    safety_threats: List[str]
+    conflicts: List[str]
+
+    # 3. Extracted Entities
+    extracted_entities: Dict[str, Optional[str]]
+
+    # 4. Gathered Evidence
+    policy_evidence: List[PolicyEvidenceItem]
+    operational_evidence: OperationalEvidence
+
+    # 5. Decisions & Summaries
+    llm_decision: Optional[BusinessDecision]
+    rule_forced_decision: Optional[BusinessDecision]
+    decision: BusinessDecision
+    summary: str
+    reasoning_summary: str
+
+    # 6. Human Review & Accumulators (operator.add prevents overwriting)
+    requires_human_review: bool
+    supervisor_review: Optional[Dict[str, Any]]
+    review_reasons: Annotated[List[str], operator.add]
+    missing_information: Annotated[List[str], operator.add]
+    errors: Annotated[List[str], operator.add]
+
+    # 7. Final Response & Telemetry
+    status: InvestigationStatus
+    start_time: float
+    duration_ms: float
+    final_response: Optional[InvestigationResponse]
+```
+
+##### Bounded Retries & Error Handling Policy
+- **Transient Network Glitches**: `RAGClient` and `ToolClient` execute bounded retries (`max_retries = 1`) with backoff for timeouts and 5xx errors.
+- **Client Errors (404 / 400)**: Missing records (404) or malformed IDs (400) are **never retried**. A 404 cleanly updates `missing_information` without raising exceptions.
+- **False-Eligibility Prevention**: If the Tool Service is unavailable, the system **never assumes eligibility**. The decision falls back safely to `UNABLE_TO_DETERMINE` with `requires_human_review=True`.
+
+
 #### API Endpoints
 
 | Method | Endpoint | Description |
@@ -329,6 +432,8 @@ Each microservice contains its own `requirements.txt`:
   `fastapi`, `uvicorn[standard]`, `python-dotenv`, `pydantic`, `sentence-transformers`, `faiss-cpu`, `httpx`, `pyyaml`
 - **Tool Service** (`services/tool-service/requirements.txt`):
   `fastapi>=0.110.0`, `uvicorn>=0.28.0`, `pydantic>=2.0.0`, `httpx>=0.27.0`, `pytest>=8.0.0`
+- **Resolution Service** (`services/resolution-service/requirements.txt`):
+  `fastapi>=0.110.0`, `uvicorn>=0.28.0`, `pydantic>=2.0.0`, `httpx>=0.27.0`, `langgraph>=0.2.0`, `pytest>=8.0.0`, `pytest-asyncio>=0.23.0`, `python-dotenv>=1.0.0`
 
 ---
 
@@ -371,20 +476,45 @@ Interactive OpenAPI documentation is available at `http://127.0.0.1:8002/docs`.
 
 ## Running Tests
 
-### Resolution Service Test Suite
+### Resolution Service Comprehensive Suite (100 Tests)
 
-Execute the 81-test suite covering models, clients, extractor, evidence collection, deterministic business rules, safety guardrails, and API endpoints:
+Execute the 100-test suite covering LangGraph orchestration, state reducers, checkpointing, adversarial short-circuits, bounded recovery, deterministic rules, and API routes:
 
 ```bash
 python -m pytest services/resolution-service/tests
 ```
 
-### Tool Service Unit Tests
+```
+============================= test session starts =============================
+collected 100 items
 
-Execute the 43-test suite covering models, lookup tools, dispatcher, registry, agent, and API routes:
+services\resolution-service\tests\test_api.py ........                   [  8%]
+services\resolution-service\tests\test_checkpoint.py .....               [ 13%]
+services\resolution-service\tests\test_clients.py ..............         [ 27%]
+services\resolution-service\tests\test_error_recovery.py .....           [ 32%]
+services\resolution-service\tests\test_evidence.py .........             [ 41%]
+services\resolution-service\tests\test_extractor.py .........            [ 50%]
+services\resolution-service\tests\test_graph.py .....                    [ 55%]
+services\resolution-service\tests\test_investigation.py ....             [ 59%]
+services\resolution-service\tests\test_models.py ...........             [ 70%]
+services\resolution-service\tests\test_reasoning.py .....                [ 75%]
+services\resolution-service\tests\test_rules.py ..........               [ 85%]
+services\resolution-service\tests\test_safety.py ............            [ 97%]
+services\resolution-service\tests\test_state.py ...                      [100%]
+
+============================= 100 passed in 2.59s =============================
+```
+
+### Tool Service Unit Tests (43 Tests)
+
+Execute the 43-test suite covering models, lookup tools, dispatcher, registry, autonomous agent loop, and API routes:
 
 ```bash
 python -m pytest services/tool-service/tests
+```
+
+```
+============================= 43 passed in 0.74s ==============================
 ```
 
 ### Knowledge Base & Referential Integrity Validation
@@ -411,15 +541,38 @@ python scripts/test_tool_calling_qwen.py
 
 ---
 
+## Architectural Limitations & Future Roadmap
+
+1. **Checkpointer Storage Backend**: The current implementation leverages `MemorySaver` for in-memory graph state persistence and test isolation. For production multi-pod Kubernetes deployments, replacing `MemorySaver` with a durable distributed checkpointer (such as PostgreSQL via `langgraph-checkpoint-postgres` or Redis) will allow supervisor review sessions to survive pod restarts.
+2. **Read-Only Scope**: The Resolution Service strictly enforces a read-only invariant (`actions_taken = []`). It evaluates eligibility and policy compliance but does not write refund records or cancel orders. An automated write-execution stage with two-phase commit and transactional guarantees can be added in subsequent phases.
+3. **Async Streaming UI Support**: Graph execution currently returns structured JSON responses via REST endpoints. Integrating Server-Sent Events (SSE) or WebSockets will allow real-time streaming of node transitions (`astream_events`) directly to customer and agent frontend consoles.
+
+---
+
+## Resume & Portfolio Project Description
+
+### Autonomous AI Orchestration & Support Resolution Platform (AutoResolve AI)
+*Python, FastAPI, LangGraph, Pydantic v2, Qwen3 (Ollama), FAISS, SentenceTransformers, HTTPX, Pytest*
+
+- **Architected Multi-Source Investigation Engine**: Designed and implemented an autonomous customer operations resolution platform combining grounded policy retrieval (RAG) with deterministic operational database lookups across distributed microservices.
+- **Engineered LangGraph State Machine**: Orchestrated the investigation lifecycle via a compiled LangGraph `StateGraph` with strongly typed state schemas (`InvestigationState`), explicit node boundaries, and accumulator reducers (`operator.add`) for resilient fault tracking.
+- **Implemented Pre-Execution Adversarial Guard**: Built an $< 1\text{ ms}$ regex guard layer intercepting 8 attack vectors (prompt injection, roleplay jailbreaks, fake authority claims, credential extraction) with hard conditional routing that short-circuits execution before downstream RAG or tool calls.
+- **Enforced Dual-Track Deterministic Override**: Established a policy architecture where deterministic Python business rules strictly override probabilistic LLM outputs 100% of the time on hard constraints (30-day return windows, $> \$500$ thresholds, chargeback holds).
+- **Designed Durable Human-in-the-Loop Checkpointing**: Implemented durable pause/resume workflows using LangGraph checkpointers (`MemorySaver`) and `interrupt_before`, allowing high-risk investigations to suspend execution, snapshot state under thread IDs, and resume upon supervisor approval.
+- **Built Resilient Microservice Clients**: Created typed async HTTP clients with bounded retries, exponential backoffs, and partial-evidence degradation policies, preventing false eligibility assessments during upstream service outages.
+- **Comprehensive Test Coverage**: Developed a 143-test automated regression suite with mock transports and call counters verifying state isolation, security invariance, and zero regressions.
+
+---
+
 ## Repository Status & Implementation Inventory
 
 The following table summarizes the current state of directories and components in the repository:
 
 | Path | Status | Physical Contents / Description |
 |---|---|---|
-| `services/resolution-service/` | **Implemented** | Complete multi-source investigation service (extractor, async clients, evidence collector, deterministic rules, Qwen3 reasoner, safety guardrails, API endpoints, 81 tests). |
-| `services/rag-service/` | **Implemented** | Complete RAG microservice (loader, chunker, FAISS, embedder, generator, API endpoints, tests, cache). |
-| `services/tool-service/` | **Implemented** | Complete tool service (order, customer, payment, refund tools, dispatcher, agent, API endpoints, tests). |
+| `services/resolution-service/` | **Implemented** | Complete LangGraph investigation service (state schema, 8 graph nodes, conditional routing, durable checkpointing, async clients, evidence collector, deterministic rules, Qwen3 reasoner, safety guardrails, API endpoints, 100 tests). |
+| `services/rag-service/` | **Implemented** | Complete RAG microservice (loader, chunker, FAISS FlatIP, embedder, generator, API endpoints, tests, cache). |
+| `services/tool-service/` | **Implemented** | Complete tool service (order, customer, payment, refund tools, dispatcher, autonomous QwenToolAgent, API endpoints, 43 tests). |
 | `knowledge/` | **Implemented** | 24 Markdown knowledge documents across policies, FAQs, runbooks, plus `RULES.md` and `CONSISTENCY_REPORT.md`. |
 | `data/` | **Implemented** | Complete JSON datasets for customers, orders, payments, refunds, standard tickets, and adversarial tickets. |
 | `scripts/` | **Implemented** | Data generation script, knowledge validation script, and test/demo runners. |
@@ -427,4 +580,5 @@ The following table summarizes the current state of directories and components i
 | `docs/` | **Empty** | Directory exists with no files. |
 | `frontend/` | **Empty** | Directory exists with no files. |
 | `infra/` | **Empty** | Directory exists with no files. |
+
 
