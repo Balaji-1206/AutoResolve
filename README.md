@@ -472,6 +472,17 @@ python -m uvicorn app.main:app --app-dir services/resolution-service --host 127.
 
 Interactive OpenAPI documentation is available at `http://127.0.0.1:8002/docs`.
 
+### Starting the Showcase Frontend
+
+From the `frontend/` directory:
+
+```bash
+cd frontend
+npm run dev
+```
+
+The executive operations dashboard will be live at `http://localhost:3000` with fluid glassmorphism, live resolution journey visualizer, and supervisor authorization console.
+
 ---
 
 ## Running Tests
@@ -578,7 +589,7 @@ The following table summarizes the current state of directories and components i
 | `scripts/` | **Implemented** | Data generation script, knowledge validation script, and test/demo runners. |
 | `evals/` | **Skeleton Only** | Subdirectories `datasets/` and `results/` containing only `.gitkeep` files. |
 | `docs/` | **Empty** | Directory exists with no files. |
-| `frontend/` | **Empty** | Directory exists with no files. |
+| `frontend/` | **Implemented** | Next.js 14 App Router dashboard with light glassmorphism, Framer Motion springs, 4 executive tabs, live visual journey, and supervisor authorization console. |
 | `infra/` | **Empty** | Directory exists with no files. |
 
 

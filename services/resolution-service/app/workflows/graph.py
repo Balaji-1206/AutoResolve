@@ -17,7 +17,7 @@ from typing import Any, Dict, Optional
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import interrupt
-
+ 
 from app.clients.rag_client import RAGClient
 from app.clients.tool_client import ToolClient
 from app.models.resolution import (
