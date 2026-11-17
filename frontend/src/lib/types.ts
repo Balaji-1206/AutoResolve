@@ -53,7 +53,15 @@ export interface PresetTicket {
   badgeColor: string;
 }
 
-export type ActiveTab = "playground" | "visualizer" | "supervisor" | "system";
+export type ActiveTab =
+  | "concierge"
+  | "orders"
+  | "policies"
+  | "supervisor"
+  | "playground"
+  | "visualizer"
+  | "system";
+
 
 export interface ServiceHealth {
   service: string;

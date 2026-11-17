@@ -4,24 +4,26 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/Header";
 import { TabsNavigation } from "@/components/TabsNavigation";
-import { PlaygroundTab } from "@/components/tabs/PlaygroundTab";
-import { VisualTraceTab } from "@/components/tabs/VisualTraceTab";
-import { SupervisorTab } from "@/components/tabs/SupervisorTab";
+import { CustomerPortalTab } from "@/components/tabs/CustomerPortalTab";
+import { CustomerOrdersTab } from "@/components/tabs/CustomerOrdersTab";
 import { SystemTab } from "@/components/tabs/SystemTab";
+import { SupervisorTab } from "@/components/tabs/SupervisorTab";
+import { SupervisorNotificationModal } from "@/components/SupervisorNotificationModal";
 import { ToastProvider } from "@/components/Toast";
 import { ActiveTab, InvestigationResult, PendingCase } from "@/lib/types";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>("playground");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("concierge");
   const [lastResult, setLastResult] = useState<InvestigationResult | null>(null);
   const [lastTicketText, setLastTicketText] = useState<string>("");
   const [supervisorCases, setSupervisorCases] = useState<PendingCase[]>([]);
+  const [isSupervisorModalOpen, setIsSupervisorModalOpen] = useState<boolean>(false);
 
   const handleNewResult = (result: InvestigationResult, text: string) => {
     setLastResult(result);
     setLastTicketText(text);
 
-    // If the live investigation requires human supervisor review, automatically queue it
+    // If the live investigation requires human supervisor review, automatically queue notification
     if (result.requires_human_review) {
       setSupervisorCases((prev) => {
         const ticketKey = result.ticket_id || "TCK-REVIEW";
@@ -55,6 +57,7 @@ export default function Home() {
       });
     }
   };
+
 
 
   return (
@@ -109,46 +112,62 @@ export default function Home() {
 
         {/* 🌟 2. Main Foreground Layer */}
         <div className="relative z-10 flex flex-col flex-1">
-          {/* Navigation Bar */}
-          <Header />
+          {/* Customer Store Header */}
+          <Header
+            supervisorAlertCount={supervisorCases.filter((c) => c.status === "pending").length}
+            onOpenSupervisorModal={() => setIsSupervisorModalOpen(true)}
+          />
 
-          {/* Segmented Navigation Tabs */}
+          {/* Customer Portal Navigation Tabs */}
           <TabsNavigation
             activeTab={activeTab}
             onTabChange={setActiveTab}
             pendingReviewCount={supervisorCases.filter((c) => c.status === "pending").length}
           />
 
-          {/* Active Tab Content with Smooth Transitions */}
+          {/* Active Customer View with Smooth Transitions */}
           <div className="relative w-full flex-1">
             <AnimatePresence mode="wait" initial={false}>
-              {activeTab === "playground" && (
+              {(activeTab === "concierge" || activeTab === "playground") && (
                 <motion.div
-                  key="playground"
+                  key="concierge"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                  <PlaygroundTab
+                  <CustomerPortalTab
                     onSwitchTab={setActiveTab}
                     onNewResult={handleNewResult}
                   />
                 </motion.div>
               )}
 
-              {activeTab === "visualizer" && (
+              {activeTab === "orders" && (
                 <motion.div
-                  key="visualizer"
+                  key="orders"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                  <VisualTraceTab
-                    lastResult={lastResult}
-                    lastTicketText={lastTicketText}
+                  <CustomerOrdersTab
+                    onSelectOrderForResolution={(ordId, text) => {
+                      setActiveTab("concierge");
+                    }}
                   />
+                </motion.div>
+              )}
+
+              {(activeTab === "policies" || activeTab === "system") && (
+                <motion.div
+                  key="policies"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                >
+                  <SystemTab />
                 </motion.div>
               )}
 
@@ -163,25 +182,22 @@ export default function Home() {
                   <SupervisorTab
                     cases={supervisorCases}
                     setCases={setSupervisorCases}
-                    onNavigateToPlayground={() => setActiveTab("playground")}
+                    onNavigateToPlayground={() => setActiveTab("concierge")}
                   />
-                </motion.div>
-              )}
-
-              {activeTab === "system" && (
-                <motion.div
-                  key="system"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                >
-                  <SystemTab />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Supervisor Alert Modal (Human-in-the-Loop Notification) */}
+        <SupervisorNotificationModal
+          isOpen={isSupervisorModalOpen}
+          onClose={() => setIsSupervisorModalOpen(false)}
+          cases={supervisorCases}
+          setCases={setSupervisorCases}
+        />
+
 
         {/* 🌟 3. Executive Footer */}
         <footer className="relative z-10 w-full border-t border-slate-200/80 bg-white/50 backdrop-blur-md mt-16">

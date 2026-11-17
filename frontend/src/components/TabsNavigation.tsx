@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { MessageSquareText, GitBranch, UserCheck, Activity } from "lucide-react";
+import { Sparkles, Package, BookOpen, Bell } from "lucide-react";
 import { ActiveTab } from "@/lib/types";
 
 interface TabsNavigationProps {
@@ -14,35 +14,36 @@ interface TabsNavigationProps {
 export const TabsNavigation: React.FC<TabsNavigationProps> = ({
   activeTab,
   onTabChange,
-  pendingReviewCount = 1,
+  pendingReviewCount = 0,
 }) => {
   const tabs = [
     {
-      id: "playground" as ActiveTab,
-      label: "Resolution Desk",
-      icon: MessageSquareText,
-      description: "Live Customer Stream & AI Workspace",
+      id: "concierge" as ActiveTab,
+      label: "Instant Resolution",
+      icon: Sparkles,
+      description: "Automated Order & Return Assistant",
+    },
+    {
+      id: "orders" as ActiveTab,
+      label: "My Orders & Tracking",
+      icon: Package,
+      description: "Carrier Status & Return Windows",
+    },
+    {
+      id: "policies" as ActiveTab,
+      label: "Store Policies & FAQs",
+      icon: BookOpen,
+      description: "30-Day Return Guidelines & SLAs",
     },
     {
       id: "supervisor" as ActiveTab,
-      label: "Supervisor Queue",
-      icon: UserCheck,
-      description: "Human-in-the-Loop Sign-Off",
+      label: "Supervisor Alert Desk",
+      icon: Bell,
+      description: "Human-in-the-Loop Notifications",
       badge: pendingReviewCount > 0 ? pendingReviewCount : undefined,
     },
-    {
-      id: "visualizer" as ActiveTab,
-      label: "Decision Journey",
-      icon: GitBranch,
-      description: "Multi-Agent State Machine Audit",
-    },
-    {
-      id: "system" as ActiveTab,
-      label: "Knowledge & Policies",
-      icon: Activity,
-      description: "Authoritative Operating Guidelines",
-    },
   ];
+
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
