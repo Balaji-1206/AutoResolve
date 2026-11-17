@@ -313,7 +313,7 @@ export const SupervisorTab: React.FC<SupervisorTabProps> = ({
                 onClick={onNavigateToPlayground}
                 className="mt-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-xs sm:text-sm hover:from-indigo-700 hover:to-violet-700 shadow-md shadow-indigo-500/20 transition-all inline-flex items-center gap-2"
               >
-                <span>Test a High-Value Order in Resolution Hub</span>
+                <span>Go to Resolution Desk</span>
                 <Sparkles className="w-4 h-4" />
               </button>
             )}

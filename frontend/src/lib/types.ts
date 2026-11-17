@@ -77,4 +77,23 @@ export interface PendingCase {
   notes?: string;
 }
 
+export interface SupportTicket {
+  id: string;
+  ticketNumber: string;
+  customerName: string;
+  customerEmail: string;
+  customerAvatar?: string;
+  subject: string;
+  message: string;
+  orderId?: string;
+  channel: "Email" | "Live Chat" | "Portal" | "Mobile App";
+  priority: "Urgent" | "High" | "Normal" | "Low";
+  createdAt: string;
+  status: "resolved" | "pending_review" | "awaiting_customer" | "declined" | "new";
+  result?: InvestigationResult | null;
+  agentResponse?: string;
+  dispatched?: boolean;
+}
+
+
 

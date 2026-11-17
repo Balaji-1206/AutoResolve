@@ -19,28 +19,28 @@ export const TabsNavigation: React.FC<TabsNavigationProps> = ({
   const tabs = [
     {
       id: "playground" as ActiveTab,
-      label: "Ticket Resolution Hub",
+      label: "Resolution Desk",
       icon: MessageSquareText,
-      description: "Interactive Inquiry Testing",
-    },
-    {
-      id: "visualizer" as ActiveTab,
-      label: "Live Resolution Journey",
-      icon: GitBranch,
-      description: "Multi-Agent Decision Pipeline",
+      description: "Live Customer Stream & AI Workspace",
     },
     {
       id: "supervisor" as ActiveTab,
-      label: "Supervisor Authorization",
+      label: "Supervisor Queue",
       icon: UserCheck,
-      description: "Human Oversight Checkpoint",
+      description: "Human-in-the-Loop Sign-Off",
       badge: pendingReviewCount > 0 ? pendingReviewCount : undefined,
     },
     {
+      id: "visualizer" as ActiveTab,
+      label: "Decision Journey",
+      icon: GitBranch,
+      description: "Multi-Agent State Machine Audit",
+    },
+    {
       id: "system" as ActiveTab,
-      label: "System & Knowledge Engine",
+      label: "Knowledge & Policies",
       icon: Activity,
-      description: "Policy Docs & Service Health",
+      description: "Authoritative Operating Guidelines",
     },
   ];
 
