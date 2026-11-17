@@ -98,8 +98,8 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
       if (res.requires_human_review && onSupervisorAlertTriggered) {
         onSupervisorAlertTriggered(res, selectedProfile, inquiryText);
         toast.warning(
-          "Supervisor Alert Dispatched",
-          `Order ${orderId} exceeds automated thresholds. Senior Operations Supervisor notified.`
+          "Manager Review Requested",
+          `Order ${orderId} exceeds standard automated limit. Notification sent to store management.`
         );
       } else if (res.decision === "ELIGIBLE") {
         toast.success("Resolution Complete", "Your return request has been automatically approved!");
@@ -362,7 +362,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                       </div>
                       <div>
                         <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                          Automated Resolution Success
+                          Automated Resolution Complete
                         </span>
                         <h3 className="text-lg font-black text-slate-900">
                           Return Request Approved
@@ -375,7 +375,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                   </div>
 
                   <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                    Your order {orderId} meets all requirements under our 30-day return policy [POL-REFUND-001]. A full refund of <strong className="text-slate-900 font-bold">${result.operational_evidence?.order?.total_amount?.toFixed(2) || "120.00"}</strong> has been scheduled to your original payment method.
+                    Your order {orderId} meets all requirements under our standard 30-day return policy. A full refund of <strong className="text-slate-900 font-bold">${result.operational_evidence?.order?.total_amount?.toFixed(2) || "120.00"}</strong> has been scheduled to your original payment method.
                   </p>
 
                   <div className="p-4 rounded-2xl bg-white border border-emerald-200 shadow-sm flex items-center justify-between gap-4">
@@ -413,10 +413,10 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                       </div>
                       <div>
                         <span className="text-[11px] font-black uppercase tracking-wider text-amber-800">
-                          Secondary Verification Required
+                          Store Manager Review
                         </span>
                         <h3 className="text-lg font-black text-slate-900">
-                          Supervisor Sign-Off in Progress
+                          Manager Review in Progress
                         </h3>
                       </div>
                     </div>
@@ -426,16 +426,16 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                   </div>
 
                   <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                    Because this transaction total (${result.operational_evidence?.order?.total_amount?.toFixed(2) || "750.00"}) exceeds the $500.00 standard threshold, company policy [POL-REFUND-001] requires a secondary sign-off from our Senior Operations Supervisor.
+                    Because this transaction total (${result.operational_evidence?.order?.total_amount?.toFixed(2) || "750.00"}) exceeds our $500.00 standard threshold, store policy requires a quick sign-off from our Customer Care Manager.
                   </p>
 
                   <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-xs text-amber-950 font-medium space-y-1.5 shadow-sm">
                     <div className="font-bold flex items-center gap-1.5 text-amber-900">
                       <Bell className="w-4 h-4 text-amber-600 animate-pulse" />
-                      Live Notification Sent to Operations Supervisor
+                      Notification Sent to Store Manager
                     </div>
                     <p className="text-[11px] text-amber-800 leading-relaxed">
-                      A high-priority review alert has been delivered to the supervisor on duty. You will receive an automated email confirmation at <span className="font-bold">{selectedProfile.email}</span> within 2–4 business hours.
+                      A review notification has been delivered to the store manager on duty. You will receive an automated email confirmation at <span className="font-bold">{selectedProfile.email}</span> within 2–4 business hours.
                     </p>
                   </div>
                 </div>
@@ -450,7 +450,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                       </div>
                       <div>
                         <span className="text-[11px] font-black uppercase tracking-wider text-rose-800">
-                          Policy Determination
+                          Store Policy Guidelines
                         </span>
                         <h3 className="text-lg font-black text-slate-900">
                           Return Not Eligible
@@ -463,7 +463,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                   </div>
 
                   <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                    {result.reasoning_summary || "This item is classified as non-refundable under catalog policy constraints (POL-REFUND-001)."}
+                    {result.reasoning_summary?.replace(/\[POL-[A-Z0-9-]+\]/g, "")?.replace(/\(POL-[A-Z0-9-]+\)/g, "") || "This item is classified as non-refundable under our published store return policy."}
                   </p>
 
                   <div className="p-4 rounded-2xl bg-white border border-rose-200 text-xs text-slate-600 font-normal space-y-1 shadow-sm">

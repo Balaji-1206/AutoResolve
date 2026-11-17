@@ -3,21 +3,23 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Activity,
   BookOpen,
-  Database,
-  Cpu,
+  RotateCcw,
+  Truck,
+  ShieldCheck,
+  CheckCircle2,
   Sparkles,
   RefreshCw,
   Search,
+  HelpCircle,
+  Clock,
+  PackageCheck,
 } from "lucide-react";
-import { fetchAllServiceHealth, fetchPolicies, PolicyDocument } from "@/lib/api";
-import { ServiceHealth } from "@/lib/types";
+import { fetchPolicies, PolicyDocument } from "@/lib/api";
 import { useToast } from "../Toast";
 import { CopyButton } from "../CopyButton";
 
 export const SystemTab: React.FC = () => {
-  const [healthList, setHealthList] = useState<ServiceHealth[]>([]);
   const [documents, setDocuments] = useState<PolicyDocument[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState<boolean>(true);
   const [docError, setDocError] = useState<string | null>(null);
@@ -25,16 +27,6 @@ export const SystemTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const toast = useToast();
-
-  const loadHealth = async () => {
-    setIsRefreshing(true);
-    try {
-      const data = await fetchAllServiceHealth();
-      setHealthList(data);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
 
   const loadPoliciesData = async () => {
     setIsLoadingDocs(true);
@@ -46,21 +38,25 @@ export const SystemTab: React.FC = () => {
         setSelectedDoc((prev) => (docs.some((d) => d.id === prev) ? prev : docs[0].id));
       }
     } catch (err: any) {
-      console.error("Failed to load live policies:", err);
-      setDocError(err.message || "Failed to fetch policies from RAG engine");
+      console.error("Failed to load store policies:", err);
+      setDocError(err.message || "Failed to load store policies.");
     } finally {
       setIsLoadingDocs(false);
     }
   };
 
   useEffect(() => {
-    loadHealth();
     loadPoliciesData();
   }, []);
 
   const handleManualRefresh = async () => {
-    await Promise.all([loadHealth(), loadPoliciesData()]);
-    toast.success("System Data Refreshed", "Live health and authoritative policies re-fetched.");
+    setIsRefreshing(true);
+    try {
+      await loadPoliciesData();
+      toast.success("Policies Refreshed", "Store policies and guidelines updated.");
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const filteredDocs = documents.filter(
@@ -71,8 +67,6 @@ export const SystemTab: React.FC = () => {
   );
 
   const currentDoc = documents.find((d) => d.id === selectedDoc) || documents[0] || null;
-
-
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
@@ -85,15 +79,15 @@ export const SystemTab: React.FC = () => {
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              System Architecture & Knowledge Repository
+              Customer Help Center & Store Policies
             </h2>
-            <span className="px-3 py-1 text-xs font-black rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              Decoupled Architecture
+            <span className="px-3 py-1 text-xs font-black rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              AcmeCommerce Guarantee
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-1.5">
-            Real-time status of policy knowledge engines, operational record stores, and autonomous decision coordinators.
+            Transparent return policies, shipping coverage, and customer satisfaction standards.
           </p>
         </div>
 
@@ -104,22 +98,22 @@ export const SystemTab: React.FC = () => {
             onClick={handleManualRefresh}
             disabled={isRefreshing}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-indigo-600 shadow-sm transition-all"
-            title="Poll microservice health endpoints"
+            title="Refresh policies"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-indigo-600" : ""}`} />
-            <span>Poll Health</span>
+            <span>Refresh Policies</span>
           </motion.button>
 
           <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 bg-white/90 px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm">
-            <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
-            <span>3 Distributed Services</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>24/7 Automated Care Online</span>
           </div>
         </div>
       </motion.div>
 
-      {/* 🌟 2. Microservice Health Cards */}
+      {/* 🌟 2. Customer Trust Highlights Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-        {/* Service 1: Policy Knowledge Engine */}
+        {/* Card 1: 30-Day Return Guarantee */}
         <motion.div
           whileHover={{ y: -3 }}
           transition={{ duration: 0.28 }}
@@ -128,44 +122,44 @@ export const SystemTab: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-indigo-100 text-indigo-600 shadow-sm">
-                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-black text-slate-900">
-                  Policy Knowledge Engine
+                  30-Day Hassle-Free Returns
                 </h3>
                 <span className="text-[11px] text-slate-500 font-bold">
-                  Document Knowledge Service
+                  Satisfaction Guarantee
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-black text-emerald-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Port 8000
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              Standard
             </div>
           </div>
 
           <div className="space-y-2 text-xs sm:text-sm text-slate-700 font-semibold">
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Embedding Engine:</span>
-              <span className="font-bold text-slate-900">all-MiniLM-L6-v2 (384-d)</span>
+              <span className="text-slate-500 font-medium">Return Window:</span>
+              <span className="font-bold text-slate-900">30 Days from Delivery</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Vector Store:</span>
-              <span className="font-bold text-slate-900">FAISS (Cosine Index)</span>
+              <span className="text-slate-500 font-medium">Condition:</span>
+              <span className="font-bold text-slate-900">Unworn / Original Box</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Policy Chunks:</span>
-              <span className="font-bold text-slate-900">192 Indexed Sections</span>
+              <span className="text-slate-500 font-medium">Refund Method:</span>
+              <span className="font-bold text-slate-900">100% Original Payment</span>
             </div>
             <div className="flex justify-between py-1.5">
-              <span className="text-slate-500 font-medium">Strict Quality Floor:</span>
-              <span className="font-bold text-indigo-600">0.35 Score Minimum</span>
+              <span className="text-slate-500 font-medium">Approval Speed:</span>
+              <span className="font-bold text-indigo-600">Instant Automated</span>
             </div>
           </div>
         </motion.div>
 
-        {/* Service 2: Operational Data Service */}
+        {/* Card 2: Free Prepaid Shipping */}
         <motion.div
           whileHover={{ y: -3 }}
           transition={{ duration: 0.28 }}
@@ -174,44 +168,44 @@ export const SystemTab: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-emerald-100 text-emerald-600 shadow-sm">
-                <Database className="w-5 h-5 sm:w-6 sm:h-6" />
+                <Truck className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-black text-slate-900">
-                  Operational Records
+                  Prepaid Shipping Labels
                 </h3>
                 <span className="text-[11px] text-slate-500 font-bold">
-                  Order & Logistics Service
+                  Zero Return Postage Cost
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-black text-emerald-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Port 8001
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              Free
             </div>
           </div>
 
           <div className="space-y-2 text-xs sm:text-sm text-slate-700 font-semibold">
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Recorded Orders:</span>
-              <span className="font-bold text-slate-900">151 Purchases (ORD-XXXX)</span>
+              <span className="text-slate-500 font-medium">Shipping Carriers:</span>
+              <span className="font-bold text-slate-900">UPS Ground & FedEx</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Verified Customers:</span>
-              <span className="font-bold text-slate-900">50 Accounts (CUS-XXXX)</span>
+              <span className="text-slate-500 font-medium">Label Delivery:</span>
+              <span className="font-bold text-slate-900">Instant Digital Download</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Ledger Audit:</span>
-              <span className="font-bold text-slate-900">200 Transactions</span>
+              <span className="text-slate-500 font-medium">Drop-off Points:</span>
+              <span className="font-bold text-slate-900">10,000+ Retail Locations</span>
             </div>
             <div className="flex justify-between py-1.5">
-              <span className="text-slate-500 font-medium">Execution Safety:</span>
-              <span className="font-bold text-emerald-600">Deterministic Read-Only</span>
+              <span className="text-slate-500 font-medium">Package Tracking:</span>
+              <span className="font-bold text-emerald-600">Full Real-Time Tracking</span>
             </div>
           </div>
         </motion.div>
 
-        {/* Service 3: Intelligent Resolution Coordinator */}
+        {/* Card 3: Fair & Transparent Resolutions */}
         <motion.div
           whileHover={{ y: -3 }}
           transition={{ duration: 0.28 }}
@@ -220,39 +214,39 @@ export const SystemTab: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-violet-100 text-violet-600 shadow-sm">
-                <Cpu className="w-5 h-5 sm:w-6 sm:h-6" />
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-black text-slate-900">
-                  Resolution Coordinator
+                  Fair & Fast Resolutions
                 </h3>
                 <span className="text-[11px] text-slate-500 font-bold">
-                  Decision Pipeline Engine
+                  Automated Self-Service
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-black text-emerald-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Port 8002
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              24/7
             </div>
           </div>
 
           <div className="space-y-2 text-xs sm:text-sm text-slate-700 font-semibold">
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Decision Pipeline:</span>
-              <span className="font-bold text-slate-900">Multi-Node State Machine</span>
+              <span className="text-slate-500 font-medium">Resolution Time:</span>
+              <span className="font-bold text-slate-900">Instant (Under 1 Second)</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Local Reasoning:</span>
-              <span className="font-bold text-slate-900">Qwen3 8B Neural Engine</span>
+              <span className="text-slate-500 font-medium">Manager Review:</span>
+              <span className="font-bold text-slate-900">Available for High-Value</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 font-medium">Security Shield:</span>
-              <span className="font-bold text-emerald-600">Instant Pre-Check (&lt; 1 ms)</span>
+              <span className="text-slate-500 font-medium">Customer Notifications:</span>
+              <span className="font-bold text-emerald-600">Instant Email Delivery</span>
             </div>
             <div className="flex justify-between py-1.5">
-              <span className="text-slate-500 font-medium">Human Oversight:</span>
-              <span className="font-bold text-indigo-600">Checkpointed Resumption</span>
+              <span className="text-slate-500 font-medium">Hold Time:</span>
+              <span className="font-bold text-indigo-600">Zero Wait Time</span>
             </div>
           </div>
         </motion.div>
@@ -264,7 +258,7 @@ export const SystemTab: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <BookOpen className="w-4 h-4 text-indigo-600" />
             <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-800">
-              Authoritative Company Guidelines & Policies
+              Official Store Guidelines & Purchase Policies
             </h3>
           </div>
 
@@ -273,7 +267,7 @@ export const SystemTab: React.FC = () => {
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search policy rules..."
+              placeholder="Search store policies..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white border border-slate-200 focus:border-indigo-500 outline-none font-medium text-slate-800 placeholder-slate-400 shadow-sm"
@@ -284,12 +278,12 @@ export const SystemTab: React.FC = () => {
         {isLoadingDocs ? (
           <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
             <RefreshCw className="w-6 h-6 animate-spin text-indigo-500" />
-            <p className="text-sm font-semibold">Loading live policies from RAG knowledge engine...</p>
+            <p className="text-sm font-semibold">Loading official store policies...</p>
           </div>
         ) : docError && documents.length === 0 ? (
           <div className="p-8 text-center bg-rose-50 border border-rose-200 rounded-2xl space-y-3">
             <p className="text-sm font-bold text-rose-800">
-              Unable to load policies from RAG Knowledge Engine (Port 8000)
+              Unable to load policies right now
             </p>
             <p className="text-xs text-rose-600 font-medium">{docError}</p>
             <button
@@ -344,7 +338,7 @@ export const SystemTab: React.FC = () => {
                 <>
                   <div className="border-b pb-2.5 border-slate-100 flex items-center justify-between">
                     <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                      Authoritative Text Preview
+                      Policy Document Preview
                     </span>
                     <CopyButton textToCopy={currentDoc.fullText} label="Copy Policy" />
                   </div>
@@ -354,13 +348,12 @@ export const SystemTab: React.FC = () => {
                 </>
               ) : (
                 <div className="p-8 text-center text-xs text-slate-400 font-medium">
-                  Select a policy from the list to view its authoritative guidelines.
+                  Select a policy from the list to view its guidelines.
                 </div>
               )}
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

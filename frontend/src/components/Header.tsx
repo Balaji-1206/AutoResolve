@@ -55,14 +55,14 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-semibold tracking-wide mt-0.5 hidden sm:block">
-              Autonomous Order & Return Resolution • Powered by AutoResolve AI
+              24/7 Automated Order & Return Resolution
             </p>
           </div>
         </div>
 
-        {/* Status Indicators & Supervisor Alert Pill */}
+        {/* Status Indicators & Manager Review Notification */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Main Health Status Pill */}
+          {/* Main Service Status Pill */}
           <div className="glass-pill px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-bold text-slate-700 shadow-sm border border-white">
             <span className="relative flex h-2 w-2">
               <span
@@ -77,35 +77,25 @@ export const Header: React.FC<HeaderProps> = ({
               />
             </span>
             <span className="text-slate-800 hidden sm:inline">
-              {onlineCount === 3
-                ? "24/7 Automated Service Active"
-                : onlineCount > 0
-                ? `${onlineCount}/3 Services Live`
-                : "Automated Service Ready"}
+              {onlineCount > 0
+                ? "24/7 Automated Support Online"
+                : "Automated Support Ready"}
             </span>
             <span className="text-slate-800 sm:hidden">24/7 Live</span>
           </div>
 
-          {/* Supervisor Notification Button (Human-in-the-Loop) */}
-          {supervisorAlertCount > 0 ? (
+          {/* Store Manager Notification Button */}
+          {supervisorAlertCount > 0 && (
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={onOpenSupervisorModal}
               className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs shadow-md shadow-amber-500/25 flex items-center gap-1.5 transition-all"
+              title="Exceptions requiring manager sign-off"
             >
               <Bell className="w-3.5 h-3.5 animate-bounce" />
-              <span>Supervisor Alert ({supervisorAlertCount})</span>
+              <span>Manager Review ({supervisorAlertCount})</span>
             </motion.button>
-          ) : (
-            <button
-              onClick={onOpenSupervisorModal}
-              className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all"
-              title="Supervisor Alert Center (Triggers when autonomous limits are exceeded)"
-            >
-              <Bell className="w-3.5 h-3.5 text-slate-400" />
-              <span className="hidden sm:inline">Supervisor Alerts (0)</span>
-            </button>
           )}
         </div>
       </div>

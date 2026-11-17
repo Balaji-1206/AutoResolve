@@ -11,15 +11,23 @@ interface TabsNavigationProps {
   pendingReviewCount?: number;
 }
 
+interface TabItem {
+  id: ActiveTab;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+  badge?: number;
+}
+
 export const TabsNavigation: React.FC<TabsNavigationProps> = ({
   activeTab,
   onTabChange,
   pendingReviewCount = 0,
 }) => {
-  const tabs = [
+  const tabs: TabItem[] = [
     {
       id: "concierge" as ActiveTab,
-      label: "Instant Resolution",
+      label: "Instant Help & Returns",
       icon: Sparkles,
       description: "Automated Order & Return Assistant",
     },
@@ -27,23 +35,15 @@ export const TabsNavigation: React.FC<TabsNavigationProps> = ({
       id: "orders" as ActiveTab,
       label: "My Orders & Tracking",
       icon: Package,
-      description: "Carrier Status & Return Windows",
+      description: "Delivery Status & Return Windows",
     },
     {
       id: "policies" as ActiveTab,
       label: "Store Policies & FAQs",
       icon: BookOpen,
-      description: "30-Day Return Guidelines & SLAs",
-    },
-    {
-      id: "supervisor" as ActiveTab,
-      label: "Supervisor Alert Desk",
-      icon: Bell,
-      description: "Human-in-the-Loop Notifications",
-      badge: pendingReviewCount > 0 ? pendingReviewCount : undefined,
+      description: "30-Day Guarantees & Guidelines",
     },
   ];
-
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
@@ -51,7 +51,7 @@ export const TabsNavigation: React.FC<TabsNavigationProps> = ({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.05 }}
-        className="glass-panel p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 shadow-sm border border-white/90"
+        className="glass-panel p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 shadow-sm border border-white/90"
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;

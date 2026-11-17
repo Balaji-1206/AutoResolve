@@ -44,8 +44,8 @@ export const SupervisorNotificationModal: React.FC<SupervisorNotificationModalPr
     const note =
       activeNotes[caseId] ||
       (action === "approved"
-        ? "Authorized by Senior Operations Supervisor."
-        : "Declined under company financial guidelines.");
+        ? "Authorized by Store Care Manager."
+        : "Declined under store policy guidelines.");
 
     setCases((prev) =>
       prev.map((c) =>
@@ -53,7 +53,7 @@ export const SupervisorNotificationModal: React.FC<SupervisorNotificationModalPr
           ? {
               ...c,
               status: action,
-              reviewerId: "SUP-42 (Operations Lead)",
+              reviewerId: "Store Care Manager",
               notes: note,
             }
           : c
@@ -101,14 +101,14 @@ export const SupervisorNotificationModal: React.FC<SupervisorNotificationModalPr
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg sm:text-xl font-black text-slate-900">
-                  Supervisor Alert Center
+                  Store Manager Review Center
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
                   {pendingCases.length} Pending
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Human-in-the-Loop review triggered only when autonomous limits are exceeded.
+                Manager notifications triggered only when customer orders exceed automated limits.
               </p>
             </div>
           </div>
@@ -124,9 +124,9 @@ export const SupervisorNotificationModal: React.FC<SupervisorNotificationModalPr
         {/* Informational Banner */}
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-medium leading-relaxed">
           <strong className="text-slate-900 font-bold block mb-0.5">
-            How Autonomous Escalation Works:
+            How Automated Escalation Works:
           </strong>
-          Customers interact directly with the website. Routine requests are resolved 100% automatically without employee involvement. When a request hits a high-risk boundary (such as order totals over $500.00), AutoResolve sends a notification here for your approval.
+          Customers interact directly with the store website. Standard returns and questions are resolved 100% automatically in real-time. When an order requires management review (such as purchases over $500.00), a notification appears here for your authorization.
         </div>
 
         {/* Active Pending Alerts */}
@@ -209,10 +209,10 @@ export const SupervisorNotificationModal: React.FC<SupervisorNotificationModalPr
             <div className="p-8 text-center text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto" />
               <div className="text-sm font-bold text-slate-800">
-                Supervisor Queue Clear
+                Manager Review Queue Clear
               </div>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                No tickets currently require human intervention. All customer inquiries are being resolved autonomously by AutoResolve.
+                No tickets currently require management review. Customer inquiries are being resolved autonomously.
               </p>
             </div>
           )}
@@ -222,7 +222,7 @@ export const SupervisorNotificationModal: React.FC<SupervisorNotificationModalPr
         {resolvedCases.length > 0 && (
           <div className="space-y-3 pt-3 border-t border-slate-100">
             <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">
-              Recent Supervisor Decisions ({resolvedCases.length})
+              Recent Manager Decisions ({resolvedCases.length})
             </span>
             <div className="space-y-2 max-h-[160px] overflow-y-auto">
               {resolvedCases.map((c) => (

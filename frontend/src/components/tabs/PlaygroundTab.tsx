@@ -318,7 +318,7 @@ export const PlaygroundTab: React.FC<PlaygroundTabProps> = ({
               {activeTicket?.result?.duration_ms ? `${Math.round(activeTicket.result.duration_ms)} ms` : "< 450 ms"}
             </div>
             <span className="text-[11px] text-slate-500 font-semibold mt-0.5">
-              FastAPI + Vector Engine
+              Verified Operations Engine
             </span>
           </div>
           <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 hidden sm:block">
@@ -659,7 +659,7 @@ export const PlaygroundTab: React.FC<PlaygroundTabProps> = ({
                         Verified Order Dossier
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Port 8001 Tool Service
+                        Operational Records
                       </span>
                     </div>
 
@@ -699,7 +699,7 @@ export const PlaygroundTab: React.FC<PlaygroundTabProps> = ({
                         Policy Citation
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        Port 8000 RAG Engine
+                        Policy Knowledge Engine
                       </span>
                     </div>
 

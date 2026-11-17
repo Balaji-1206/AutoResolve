@@ -20,7 +20,7 @@ export function generateCustomerResponse(
 
 Thank you for reaching out to AcmeCommerce Customer Care.
 
-Great news! We have investigated your inquiry regarding Order ${orderRef}, and your return and refund request has been officially approved in full accordance with our Standard Return Policy [POL-REFUND-001].
+Great news! We have reviewed your inquiry regarding Order ${orderRef}, and your return request has been officially approved in full accordance with our Standard 30-Day Return Policy.
 
 Refund Authorization Summary:
 • Approved Amount: ${formattedAmount}
@@ -33,68 +33,55 @@ We have generated a prepaid return shipping label and dispatched it to your emai
 Thank you for choosing AcmeCommerce!
 
 Warm regards,
-AutoResolve Autonomous Customer Operations Team`;
+AcmeCommerce Customer Care Team`;
   }
 
   if (result.decision === "NEEDS_HUMAN_REVIEW") {
     const isHighValue = result.review_reasons?.some((r) => r.includes("$500"));
-    const isPromptAttack = result.review_reasons?.some((r) => r.toLowerCase().includes("injection") || r.toLowerCase().includes("override"));
-
-    if (isPromptAttack) {
-      return `Hello ${name},
-
-We have received your support inquiry regarding Order ${orderRef}.
-
-Your request has been routed to our Operations Security & Compliance Team for manual verification before any action can be taken. 
-
-Our team will review your account credentials and reach out to your registered email address shortly.
-
-Regards,
-AcmeCommerce Trust & Operations`;
-    }
 
     return `Hello ${name},
 
-Thank you for contacting AcmeCommerce Customer Support regarding Order ${orderRef}.
+Thank you for contacting AcmeCommerce Customer Care regarding Order ${orderRef}.
 
-Your inquiry has been prioritized and placed into our Senior Operations Supervisor Queue.
+Your inquiry has been received and routed to our Store Care Manager for priority review.
 
 ${
   isHighValue
-    ? `Because your transaction total (${formattedAmount}) exceeds our $500.00 automated threshold, company financial security policy [POL-REFUND-001] requires secondary supervisor sign-off.`
-    : result.reasoning_summary || "Our operational guidelines require manager review for this case."
+    ? `Because your transaction total (${formattedAmount}) exceeds our $500.00 standard threshold, store policy requires manager authorization before the return label can be issued.`
+    : result.reasoning_summary?.replace(/\[POL-[A-Z0-9-]+\]/g, "") || "Our store guidelines require manager review for this case."
 }
 
 Current Status:
-• Review Status: Priority Escalation in Progress
-• Assigned Queue: Operations Senior Supervisor Desk
+• Review Status: Store Manager Review in Progress
+• Assigned Queue: Customer Care Manager
 • Estimated Resolution: Within 2–4 business hours
 
-You will receive an automated confirmation email as soon as the supervisor completes the authorization. We appreciate your patience!
+You will receive an automated confirmation email as soon as the manager completes the review. We appreciate your patience!
 
 Sincerely,
-AcmeCommerce Support Desk`;
+AcmeCommerce Customer Care Team`;
   }
 
   if (result.decision === "INELIGIBLE") {
-    const reasonText =
+    const rawReason =
       result.review_reasons?.length > 0
         ? result.review_reasons.join(". ")
-        : result.reasoning_summary || "Order does not satisfy standard return constraints under company guidelines [POL-REFUND-001].";
+        : result.reasoning_summary || "Order does not satisfy our standard 30-day return policy guidelines.";
+    const cleanReason = rawReason.replace(/\[POL-[A-Z0-9-]+\]/g, "").replace(/\(POL-[A-Z0-9-]+\)/g, "").trim();
 
     return `Hello ${name},
 
-Thank you for contacting AcmeCommerce Customer Support regarding Order ${orderRef}.
+Thank you for contacting AcmeCommerce Customer Care regarding Order ${orderRef}.
 
-We have carefully evaluated your order history and item details against our published company policies. Unfortunately, we are unable to authorize a return or refund for this transaction.
+We have carefully evaluated your order history and item details against our published store policies. Unfortunately, we are unable to authorize a return or refund for this transaction.
 
-Policy Determination:
-${reasonText}
+Policy Guidelines:
+${cleanReason}
 
-If you believe this determination was reached in error or if your package was damaged in carrier transit, please reply directly with photo documentation so an agent can conduct a manual secondary review.
+If you believe this determination was reached in error or if your package was damaged during delivery, please reply directly with photo documentation so our team can conduct an exception review.
 
 Best regards,
-AcmeCommerce Customer Experience Team`;
+AcmeCommerce Customer Care Team`;
   }
 
   if (result.decision === "NEEDS_MORE_INFORMATION") {
@@ -102,25 +89,25 @@ AcmeCommerce Customer Experience Team`;
 
 Thank you for reaching out to AcmeCommerce Customer Care.
 
-We would be delighted to look into this for you immediately! To help our automated resolution engine locate your specific order records, could you please provide:
+We would be delighted to look into this for you immediately! To help locate your specific order records, could you please provide:
 
 1. Your Order Identifier (formatted as ORD-XXXX, found in your confirmation receipt)
 2. Or the billing email address associated with your purchase
 
-As soon as you reply with this information, our autonomous system will inspect your shipment status and assist you without delay.
+As soon as you reply with this information, we will verify your shipment status and assist you without delay.
 
 Kind regards,
-AutoResolve Support Operations`;
+AcmeCommerce Customer Care Team`;
   }
 
   return `Hello ${name},
 
 Thank you for contacting AcmeCommerce Support regarding Order ${orderRef}.
 
-We have logged your request in our customer operations portal. Our support team is currently verifying the details and will follow up with an update shortly.
+We have received your request. Our customer care team is currently verifying the details and will follow up with an update shortly.
 
 Thank you for your patience!
 
 Sincerely,
-AcmeCommerce Support Desk`;
+AcmeCommerce Customer Care Team`;
 }

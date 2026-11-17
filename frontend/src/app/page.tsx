@@ -199,21 +199,27 @@ export default function Home() {
         />
 
 
-        {/* 🌟 3. Executive Footer */}
+        {/* 🌟 3. Clean Customer Footer */}
         <footer className="relative z-10 w-full border-t border-slate-200/80 bg-white/50 backdrop-blur-md mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-wrap items-center justify-between text-xs sm:text-sm text-slate-500 font-semibold gap-3">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-slate-900 tracking-tight">AutoResolve AI</span>
+              <span className="font-extrabold text-slate-900 tracking-tight">AcmeCommerce</span>
               <span className="text-slate-300">•</span>
-              <span>Autonomous Customer Operations & Grounded Resolution</span>
+              <span>24/7 Automated Customer Care & Resolution Service</span>
             </div>
             <div className="flex items-center gap-4 sm:gap-6">
               <span className="flex items-center gap-2 text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shadow-sm text-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Live Enterprise Engine
+                Automated Service Online
               </span>
               <span className="text-slate-300 hidden sm:inline">•</span>
-              <span className="hidden sm:inline text-slate-500 text-xs">FastAPI Microservices (8000, 8001, 8002)</span>
+              <button
+                onClick={() => setIsSupervisorModalOpen(true)}
+                className="text-slate-500 hover:text-indigo-600 transition-colors text-xs font-semibold cursor-pointer"
+                title="Review orders requiring manager sign-off"
+              >
+                Store Management Reviews {supervisorCases.filter((c) => c.status === "pending").length > 0 && `(${supervisorCases.filter((c) => c.status === "pending").length})`}
+              </button>
             </div>
           </div>
         </footer>

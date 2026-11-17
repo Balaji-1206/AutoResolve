@@ -9,7 +9,7 @@ export const PRESET_TICKETS: PresetTicket[] = [
     order_id: "ORD-1001",
     ticket_text: "Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well. Can I exchange or return them?",
     description: "Standard apparel order ($120.00) delivered within the 30-day return window.",
-    expectedOutcome: "Approved under Policy POL-REFUND-001",
+    expectedOutcome: "Approved under 30-Day Return Policy",
     badgeColor: "emerald",
   },
   {

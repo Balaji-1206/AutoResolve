@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AutoResolve AI — Autonomous Customer Operations Platform",
+  title: "AcmeCommerce Customer Care — Instant Order & Return Resolution",
   description:
-    "Autonomous Multi-Agent Customer Support & Operations Resolution System with Grounded Policy Evaluation and Adversarial Defense",
+    "Official 24/7 automated customer resolution platform for AcmeCommerce. Instant returns, carrier tracking, and refund self-service.",
 };
 
 export default function RootLayout({
