@@ -8,6 +8,7 @@ Endpoints:
 - GET /api/v1/tools/refunds/{refund_id}: Fetches refund claim and processing status.
 """
 
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException, status
 from app.models.tool import (
     CustomerResponse,
@@ -19,12 +20,28 @@ from app.models.tool import (
 )
 from app.tools.agent import QwenToolAgent, ToolCallingResult
 from app.tools.customer import CustomerNotFoundError, get_customer
-from app.tools.orders import OrderNotFoundError, get_order
+from app.tools.orders import OrderNotFoundError, get_order, list_orders
 from app.tools.payments import PaymentNotFoundError, get_payment
 from app.tools.refunds import RefundNotFoundError, get_refund
 
 router = APIRouter(prefix="/tools", tags=["Operational Tools"])
 
+
+@router.get(
+    "/orders",
+    response_model=List[OrderResponse],
+    summary="List Orders",
+    description="Fetches live operational orders, optionally filtered by customer_id.",
+)
+async def get_orders(customer_id: Optional[str] = None) -> List[OrderResponse]:
+    """HTTP handler querying list of orders from operational data store."""
+    try:
+        return list_orders(customer_id)
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal tool error: {str(err)}",
+        )
 
 
 @router.get(

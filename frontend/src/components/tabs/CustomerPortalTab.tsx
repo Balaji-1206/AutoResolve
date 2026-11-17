@@ -23,41 +23,70 @@ import {
   BadgeCheck,
   Bell,
   RefreshCw,
+  Printer,
+  MessageSquare,
+  CornerDownRight,
 } from "lucide-react";
 import { CUSTOMER_PROFILES, CustomerProfile } from "@/lib/customerProfiles";
-import { investigateTicket } from "@/lib/api";
+import { investigateTicket, LiveOrder } from "@/lib/api";
 import { generateCustomerResponse } from "@/lib/customerResponse";
 import { InvestigationResult, ActiveTab } from "@/lib/types";
+import { OrderLookupGateway } from "../OrderLookupGateway";
+import { ReturnShippingLabelModal } from "../ReturnShippingLabelModal";
 import { useToast } from "../Toast";
 import { CopyButton } from "../CopyButton";
+
+interface SupportMessage {
+  id: string;
+  sender: "customer" | "support";
+  text: string;
+  timestamp: string;
+}
 
 interface CustomerPortalTabProps {
   onSwitchTab: (tab: ActiveTab) => void;
   onNewResult?: (result: InvestigationResult, ticketText: string) => void;
   onSupervisorAlertTriggered?: (result: InvestigationResult, customer: CustomerProfile, message: string) => void;
+  initialOrderId?: string;
+  initialInquiryText?: string;
 }
 
 export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
   onSwitchTab,
   onNewResult,
   onSupervisorAlertTriggered,
+  initialOrderId,
+  initialInquiryText,
 }) => {
   const [selectedProfile, setSelectedProfile] = useState<CustomerProfile>(CUSTOMER_PROFILES[0]);
-  const [orderId, setOrderId] = useState<string>(CUSTOMER_PROFILES[0].recentOrderId);
+  const [orderId, setOrderId] = useState<string>(initialOrderId || CUSTOMER_PROFILES[0].recentOrderId);
   const [inquiryText, setInquiryText] = useState<string>(
-    "Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well. Can I exchange or return them?"
+    initialInquiryText ||
+      "Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well. Can I exchange or return them?"
   );
+
+  React.useEffect(() => {
+    if (initialOrderId) setOrderId(initialOrderId);
+    if (initialInquiryText) setInquiryText(initialInquiryText);
+  }, [initialOrderId, initialInquiryText]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [result, setResult] = useState<InvestigationResult | null>(null);
   const [customerResponse, setCustomerResponse] = useState<string>("");
+  const [isLabelModalOpen, setIsLabelModalOpen] = useState<boolean>(false);
+
+  // 💬 Multi-Turn Conversation Thread
+  const [messages, setMessages] = useState<SupportMessage[]>([]);
+  const [followUpText, setFollowUpText] = useState<string>("");
+  const [isFollowUpLoading, setIsFollowUpLoading] = useState<boolean>(false);
+
   const toast = useToast();
 
   const handleSelectProfile = (profile: CustomerProfile) => {
     setSelectedProfile(profile);
     setOrderId(profile.recentOrderId);
     setResult(null);
+    setMessages([]);
 
-    // Provide helpful initial inquiry based on profile
     if (profile.customerId === "CUS-1001") {
       setInquiryText(
         "Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well. Can I exchange or return them?"
@@ -79,6 +108,15 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
     toast.info("Account Loaded", `Browsing as ${profile.name} (${profile.customerId})`);
   };
 
+  const handleOrderFoundFromGateway = (order: LiveOrder) => {
+    setOrderId(order.order_id);
+    setResult(null);
+    setMessages([]);
+    setInquiryText(
+      `Hello, I would like to inquire about my order ${order.order_id} (${order.product_category || "Item"}). Is it eligible for return or exchange?`
+    );
+  };
+
   const handleRunCustomerResolution = async () => {
     if (!inquiryText.trim() || isLoading) return;
     setIsLoading(true);
@@ -90,6 +128,23 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
 
       setResult(res);
       setCustomerResponse(formattedResponse);
+
+      // Initialize multi-turn conversation thread
+      const initialThread: SupportMessage[] = [
+        {
+          id: `msg-cus-${Date.now()}`,
+          sender: "customer",
+          text: inquiryText,
+          timestamp: "Just now",
+        },
+        {
+          id: `msg-sup-${Date.now() + 1}`,
+          sender: "support",
+          text: formattedResponse,
+          timestamp: "Just now",
+        },
+      ];
+      setMessages(initialThread);
 
       if (onNewResult) {
         onNewResult(res, inquiryText);
@@ -113,6 +168,42 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
     }
   };
 
+  // 💬 Multi-Turn Follow-Up Query Handler
+  const handleSendFollowUp = async (customPrompt?: string) => {
+    const textToSend = (customPrompt || followUpText).trim();
+    if (!textToSend || isFollowUpLoading) return;
+
+    const userMsg: SupportMessage = {
+      id: `msg-cus-${Date.now()}`,
+      sender: "customer",
+      text: textToSend,
+      timestamp: "Just now",
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setFollowUpText("");
+    setIsFollowUpLoading(true);
+
+    try {
+      const followUpPrompt = `Context: Order ${orderId}. Previous resolution was: ${result?.decision || "INQUIRY"}. Customer asks follow-up: "${textToSend}"`;
+      const ticketId = `TCK-${Math.floor(1000 + Math.random() * 9000)}`;
+      const res = await investigateTicket(followUpPrompt, ticketId, orderId);
+      const botResponse = generateCustomerResponse(res, selectedProfile.name, orderId);
+
+      const supportMsg: SupportMessage = {
+        id: `msg-sup-${Date.now()}`,
+        sender: "support",
+        text: botResponse,
+        timestamp: "Just now",
+      };
+      setMessages((prev) => [...prev, supportMsg]);
+      toast.info("Response Received", "AcmeCommerce Customer Care replied.");
+    } catch (err: any) {
+      toast.error("Could not process follow-up", err.message || "Failed to contact care service.");
+    } finally {
+      setIsFollowUpLoading(false);
+    }
+  };
+
   const handleQuickIssue = (
     presetOrderId: string,
     text: string,
@@ -125,6 +216,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
     setOrderId(presetOrderId);
     setInquiryText(text);
     setResult(null);
+    setMessages([]);
   };
 
   return (
@@ -151,50 +243,19 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
             Get instant, automated solutions for your AcmeCommerce orders. Our intelligent resolution system
-            verifies your delivery records and applies company policies instantly—no waiting for human agents.
+            verifies your delivery records and applies store policies instantly—no waiting on hold.
           </p>
-        </div>
-
-        {/* Customer Profile Switcher Card */}
-        <div className="p-4 rounded-2xl bg-white/80 border border-slate-200/80 shadow-sm flex flex-col gap-2 min-w-[260px]">
-          <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-400">
-            <span>Customer Account</span>
-            <span className="text-indigo-600 font-bold">Switch Account</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-black text-sm flex items-center justify-center shadow-md">
-              {selectedProfile.avatarInitials}
-            </div>
-            <div>
-              <div className="font-black text-sm text-slate-900 leading-tight">
-                {selectedProfile.name}
-              </div>
-              <div className="text-xs text-slate-500 font-semibold">
-                {selectedProfile.customerId} • {selectedProfile.email}
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-1">
-            {CUSTOMER_PROFILES.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => handleSelectProfile(p)}
-                className={`text-[10px] px-2 py-0.5 rounded-md font-bold transition-all ${
-                  selectedProfile.id === p.id
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                {p.name.split(" ")[0]}
-              </button>
-            ))}
-          </div>
         </div>
       </motion.div>
 
-      {/* 🌟 2. Quick Issue Topic Pills */}
+      {/* 🌟 2. Order Lookup & Customer Gateway */}
+      <OrderLookupGateway
+        selectedProfile={selectedProfile}
+        onSelectProfile={handleSelectProfile}
+        onOrderFound={handleOrderFoundFromGateway}
+      />
+
+      {/* 🌟 3. Quick Issue Topic Pills */}
       <div className="space-y-2">
         <span className="text-xs font-black uppercase tracking-wider text-slate-400 px-1 block">
           Common Order Questions & Requests
@@ -225,12 +286,6 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
               profileId: "cus-4",
               text: "My order ORD-1006 arrived damaged yesterday and parts are missing. I want a refund right away.",
             },
-            {
-              label: "🚚 Check Shipping & Tracking Status",
-              orderId: "ORD-1001",
-              profileId: "cus-1",
-              text: "Can you confirm the verified delivery date and carrier status for order ORD-1001?",
-            },
           ].map((topic, i) => (
             <motion.button
               key={i}
@@ -245,10 +300,10 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
         </div>
       </div>
 
-      {/* 🌟 3. Main Customer Resolution Console */}
+      {/* 🌟 4. Main Customer Resolution Console */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-        {/* Left Column: Customer Inquiry Input (lg:col-span-6) */}
-        <div className="lg:col-span-6 space-y-4">
+        {/* Left Column: Customer Inquiry Input (lg:col-span-5) */}
+        <div className="lg:col-span-5 space-y-4">
           <div className="glass-panel-elevated p-6 sm:p-7 rounded-3xl border border-white shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b pb-3 border-slate-100">
               <span className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
@@ -283,7 +338,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                 What would you like assistance with?
               </label>
               <textarea
-                rows={5}
+                rows={4}
                 value={inquiryText}
                 onChange={(e) => setInquiryText(e.target.value)}
                 placeholder="Explain what happened with your item, delivery, or return request..."
@@ -303,7 +358,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                 whileTap={{ scale: 0.98 }}
                 onClick={handleRunCustomerResolution}
                 disabled={isLoading || !inquiryText.trim()}
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-indigo-500/25 flex items-center gap-2 transition-all disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
@@ -344,8 +399,8 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Live Autonomous Customer Resolution (lg:col-span-6) */}
-        <div className="lg:col-span-6 space-y-4">
+        {/* Right Column: Live Resolution & Multi-Turn Dialogue (lg:col-span-7) */}
+        <div className="lg:col-span-7 space-y-4">
           {result ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.98, y: 10 }}
@@ -378,14 +433,14 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                     Your order {orderId} meets all requirements under our standard 30-day return policy. A full refund of <strong className="text-slate-900 font-bold">${result.operational_evidence?.order?.total_amount?.toFixed(2) || "120.00"}</strong> has been scheduled to your original payment method.
                   </p>
 
-                  <div className="p-4 rounded-2xl bg-white border border-emerald-200 shadow-sm flex items-center justify-between gap-4">
+                  <div className="p-4 rounded-2xl bg-white border border-emerald-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
-                        <Download className="w-5 h-5" />
+                        <Printer className="w-5 h-5" />
                       </div>
                       <div>
                         <div className="font-black text-xs sm:text-sm text-slate-900">
-                          Prepaid Return Shipping Label
+                          Prepaid Return Shipping Voucher
                         </div>
                         <div className="text-[11px] text-slate-500 font-medium">
                           Carrier: UPS Ground • Valid for 7 calendar days
@@ -394,11 +449,11 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                     </div>
 
                     <button
-                      onClick={() => toast.success("Shipping Label Downloaded", "UPS prepaid return voucher saved.")}
+                      onClick={() => setIsLabelModalOpen(true)}
                       className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Download Label</span>
+                      <span>View & Print Label</span>
                     </button>
                   </div>
                 </div>
@@ -477,17 +532,104 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                 </div>
               )}
 
-              {/* Full Detailed Customer Message Card */}
-              <div className="glass-panel-elevated p-5 sm:p-6 rounded-3xl border border-white shadow-xl space-y-3">
-                <div className="flex items-center justify-between border-b pb-2.5 border-slate-100">
+              {/* 💬 5. Multi-Turn Interactive Support Conversation Timeline */}
+              <div className="glass-panel-elevated p-5 sm:p-6 rounded-3xl border border-white shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b pb-3 border-slate-100">
                   <span className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                    <BadgeCheck className="w-4 h-4 text-indigo-600" />
-                    Official Customer Care Statement
+                    <MessageSquare className="w-4 h-4 text-indigo-600" />
+                    Support Conversation Timeline
                   </span>
-                  <CopyButton textToCopy={customerResponse} label="Copy Statement" />
+                  <span className="text-[11px] text-slate-400 font-bold">
+                    Interactive Care Concierge
+                  </span>
                 </div>
-                <div className="p-4 rounded-2xl bg-white/90 border border-slate-200 text-xs sm:text-sm text-slate-800 font-sans leading-relaxed whitespace-pre-wrap shadow-sm">
-                  {customerResponse}
+
+                {/* Messages List */}
+                <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+                  {messages.map((msg) => (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex flex-col ${
+                        msg.sender === "customer" ? "items-end" : "items-start"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1 px-1">
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {msg.sender === "customer" ? selectedProfile.name : "AcmeCommerce Customer Care"}
+                        </span>
+                        <span className="text-[10px] text-slate-300">•</span>
+                        <span className="text-[10px] text-slate-400">{msg.timestamp}</span>
+                      </div>
+
+                      <div
+                        className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed max-w-[90%] whitespace-pre-wrap shadow-sm ${
+                          msg.sender === "customer"
+                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-tr-sm"
+                            : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm font-sans"
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {isFollowUpLoading && (
+                    <div className="flex items-center gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-500 font-bold w-fit animate-pulse">
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+                      <span>Customer Care Assistant is replying...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Follow-up Question Chips */}
+                <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                    Suggested Follow-Up Questions:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "Where is the nearest UPS drop-off location?",
+                      "How long until my refund settles to my card?",
+                      "Can I exchange for another size instead of refund?",
+                      "What if I already opened the packaging?",
+                    ].map((suggestion, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSendFollowUp(suggestion)}
+                        disabled={isFollowUpLoading}
+                        className="text-[11px] px-3 py-1 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 font-semibold transition-colors border border-slate-200/60 disabled:opacity-50"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Follow-Up Text Input */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={followUpText}
+                    onChange={(e) => setFollowUpText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendFollowUp();
+                      }
+                    }}
+                    placeholder="Type a follow-up question or clarification..."
+                    className="flex-1 px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white outline-none font-medium text-slate-900 shadow-sm"
+                  />
+                  <button
+                    onClick={() => handleSendFollowUp()}
+                    disabled={isFollowUpLoading || !followUpText.trim()}
+                    className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <span>Send</span>
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -506,6 +648,16 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
           )}
         </div>
       </div>
+
+      {/* 🏷️ Printable Return Shipping Voucher & Barcode Modal */}
+      <ReturnShippingLabelModal
+        isOpen={isLabelModalOpen}
+        onClose={() => setIsLabelModalOpen(false)}
+        orderId={orderId}
+        customerName={selectedProfile.name}
+        itemTitle={selectedProfile.recentOrderTitle}
+        refundAmount={result?.operational_evidence?.order?.total_amount || selectedProfile.orderAmount}
+      />
     </div>
   );
 };

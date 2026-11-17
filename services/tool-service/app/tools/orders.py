@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from app.models.tool import OrderResponse
 
 
@@ -110,3 +110,15 @@ def get_order(order_id: str) -> OrderResponse:
         raise OrderNotFoundError(f"Order '{clean_id}' not found in operational database.")
 
     return index[clean_id]
+
+
+def list_orders(customer_id: Optional[str] = None) -> List[OrderResponse]:
+    """
+    Retrieve list of orders from the operational store, optionally filtered by customer_id.
+    """
+    index = _load_orders_index()
+    orders = list(index.values())
+    if customer_id:
+        clean_cus = customer_id.strip().upper()
+        orders = [o for o in orders if o.customer_id.upper() == clean_cus]
+    return orders

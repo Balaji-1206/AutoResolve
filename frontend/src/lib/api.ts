@@ -12,6 +12,40 @@ export interface PolicyDocument {
   fullText: string;
 }
 
+export interface LiveOrder {
+  order_id: string;
+  customer_id: string;
+  status: string;
+  total_amount: number;
+  currency: string;
+  order_date: string;
+  delivery_date?: string;
+  shipping_status?: string;
+  product_category?: string;
+  payment_id?: string;
+  refundable?: boolean;
+}
+
+export async function fetchLiveOrders(customerId?: string): Promise<LiveOrder[]> {
+  const url = customerId
+    ? `${TOOL_URL}/api/v1/tools/orders?customer_id=${encodeURIComponent(customerId)}`
+    : `${TOOL_URL}/api/v1/tools/orders`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch orders: HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function fetchLiveOrderById(orderId: string): Promise<LiveOrder> {
+  const cleanId = orderId.trim().toUpperCase();
+  const res = await fetch(`${TOOL_URL}/api/v1/tools/orders/${encodeURIComponent(cleanId)}`, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Order ${cleanId} was not found in live records.`);
+  }
+  return await res.json();
+}
+
 export async function investigateTicket(
   ticketText: string,
   ticketId?: string,

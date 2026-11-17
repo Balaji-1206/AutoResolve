@@ -18,6 +18,8 @@ export default function Home() {
   const [lastTicketText, setLastTicketText] = useState<string>("");
   const [supervisorCases, setSupervisorCases] = useState<PendingCase[]>([]);
   const [isSupervisorModalOpen, setIsSupervisorModalOpen] = useState<boolean>(false);
+  const [conciergeOrderId, setConciergeOrderId] = useState<string>("");
+  const [conciergeInquiryText, setConciergeInquiryText] = useState<string>("");
 
   const handleNewResult = (result: InvestigationResult, text: string) => {
     setLastResult(result);
@@ -139,6 +141,8 @@ export default function Home() {
                   <CustomerPortalTab
                     onSwitchTab={setActiveTab}
                     onNewResult={handleNewResult}
+                    initialOrderId={conciergeOrderId}
+                    initialInquiryText={conciergeInquiryText}
                   />
                 </motion.div>
               )}
@@ -153,6 +157,8 @@ export default function Home() {
                 >
                   <CustomerOrdersTab
                     onSelectOrderForResolution={(ordId, text) => {
+                      setConciergeOrderId(ordId);
+                      setConciergeInquiryText(text);
                       setActiveTab("concierge");
                     }}
                   />
