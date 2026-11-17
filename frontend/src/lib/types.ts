@@ -63,3 +63,18 @@ export interface ServiceHealth {
   details?: Record<string, any>;
 }
 
+export interface PendingCase {
+  id: string;
+  ticketId: string;
+  orderId: string;
+  customerName: string;
+  orderAmount: number;
+  customerMessage: string;
+  reasonForReview: string;
+  timestamp: string;
+  status: "pending" | "approved" | "declined";
+  reviewerId?: string;
+  notes?: string;
+}
+
+

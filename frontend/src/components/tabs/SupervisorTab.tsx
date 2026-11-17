@@ -16,52 +16,23 @@ import {
 } from "lucide-react";
 import { useToast } from "../Toast";
 import { CopyButton } from "../CopyButton";
+import { PendingCase } from "@/lib/types";
 
-interface PendingCase {
-  id: string;
-  ticketId: string;
-  orderId: string;
-  customerName: string;
-  orderAmount: number;
-  customerMessage: string;
-  reasonForReview: string;
-  timestamp: string;
-  status: "pending" | "approved" | "declined";
-  reviewerId?: string;
-  notes?: string;
+interface SupervisorTabProps {
+  cases: PendingCase[];
+  setCases: React.Dispatch<React.SetStateAction<PendingCase[]>>;
+  onNavigateToPlayground?: () => void;
 }
 
-export const SupervisorTab: React.FC = () => {
-  const [cases, setCases] = useState<PendingCase[]>([
-    {
-      id: "case-1",
-      ticketId: "TCK-1002",
-      orderId: "ORD-1002",
-      customerName: "Robert Chen (CUS-1002)",
-      orderAmount: 750.0,
-      customerMessage:
-        "I want to return the 4K Ultra HD TV in order ORD-1002. The screen size does not fit my living room stand.",
-      reasonForReview: "Order amount $750.00 exceeds the $500.00 supervisor sign-off threshold (POL-REFUND-001).",
-      timestamp: "12 mins ago",
-      status: "pending",
-    },
-    {
-      id: "case-2",
-      ticketId: "TCK-1006",
-      orderId: "ORD-1006",
-      customerName: "Elena Rostova (CUS-1006)",
-      orderAmount: 210.0,
-      customerMessage:
-        "My order ORD-1006 arrived damaged yesterday and parts are missing. I want a refund right away.",
-      reasonForReview: "Discrepancy: Customer reports delivery, but warehouse tracking shows status 'PROCESSING'.",
-      timestamp: "34 mins ago",
-      status: "pending",
-    },
-  ]);
-
+export const SupervisorTab: React.FC<SupervisorTabProps> = ({
+  cases,
+  setCases,
+  onNavigateToPlayground,
+}) => {
   const [reviewerId, setReviewerId] = useState<string>("SUP-42 (Senior Operations Manager)");
   const [activeNotes, setActiveNotes] = useState<Record<string, string>>({});
   const toast = useToast();
+
 
   const handleAction = (caseId: string, action: "approved" | "declined") => {
     const targetCase = cases.find((c) => c.id === caseId);
@@ -326,17 +297,26 @@ export const SupervisorTab: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-panel-elevated p-10 sm:p-12 rounded-3xl text-center space-y-3 border border-emerald-200/60"
+            className="glass-panel-elevated p-10 sm:p-12 rounded-3xl text-center space-y-4 border border-emerald-200/60"
           >
             <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md">
               <CheckCircle className="w-7 h-7" />
             </div>
             <h4 className="text-base sm:text-lg font-black text-slate-900">
-              All Exceptions Authorized & Cleared
+              Supervisor Authorization Queue Clear
             </h4>
-            <p className="text-xs sm:text-sm font-semibold text-slate-500 max-w-md mx-auto">
-              Every high-value order and delivery discrepancy has been reviewed. The system is operating normally within autonomous limits.
+            <p className="text-xs sm:text-sm font-semibold text-slate-500 max-w-md mx-auto leading-relaxed">
+              No tickets currently require human sign-off. The resolution engine handles standard inquiries automatically according to policy rules.
             </p>
+            {onNavigateToPlayground && (
+              <button
+                onClick={onNavigateToPlayground}
+                className="mt-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-xs sm:text-sm hover:from-indigo-700 hover:to-violet-700 shadow-md shadow-indigo-500/20 transition-all inline-flex items-center gap-2"
+              >
+                <span>Test a High-Value Order in Resolution Hub</span>
+                <Sparkles className="w-4 h-4" />
+              </button>
+            )}
           </motion.div>
         )}
       </section>

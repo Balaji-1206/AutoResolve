@@ -7,6 +7,7 @@ Endpoints:
 - POST /api/v1/rag/reindex: Dynamic re-indexing of knowledge documents
 """
 
+from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 import httpx
 from app.models.rag import (
@@ -16,6 +17,7 @@ from app.models.rag import (
     ReindexResponse
 )
 from app.rag.pipeline import RAGPipeline
+from app.rag.loader import load_documents
 
 router = APIRouter(prefix="/rag", tags=["RAG Knowledge Engine"])
 
@@ -111,3 +113,33 @@ async def reindex_knowledge(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Reindexing failed: {str(e)}"
         )
+
+
+@router.get(
+    "/policies",
+    summary="List All Authoritative Knowledge Policies",
+    description="Loads all authoritative Markdown policy documents directly from the knowledge store."
+)
+async def list_policies(
+    rag: RAGPipeline = Depends(get_rag_pipeline)
+) -> List[Dict[str, Any]]:
+    docs = load_documents(rag.knowledge_path)
+    result = []
+    for d in docs:
+        meta = d.get("metadata", {})
+        doc_id = meta.get("document_id", "DOC")
+        # Only return policy and rules documents
+        if not (doc_id.startswith("POL-") or doc_id.startswith("RULES-") or doc_id.startswith("RUN-")):
+            continue
+        lines = [l.strip() for l in d["text"].split("\n") if l.strip()]
+        first_heading = next((l.lstrip("#").strip() for l in lines if l.startswith("#")), doc_id)
+        summary = meta.get("description") or (lines[1] if len(lines) > 1 and not lines[1].startswith("#") else f"Authoritative guidance for {meta.get('domain', 'operations')}")
+        result.append({
+            "id": doc_id,
+            "title": f"{first_heading} ({doc_id})",
+            "category": meta.get("domain", "operations").replace("_", " ").title(),
+            "summary": summary,
+            "fullText": d["text"]
+        })
+    return result
+

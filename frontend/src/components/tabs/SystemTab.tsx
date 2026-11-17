@@ -11,14 +11,17 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
-import { fetchAllServiceHealth } from "@/lib/api";
+import { fetchAllServiceHealth, fetchPolicies, PolicyDocument } from "@/lib/api";
 import { ServiceHealth } from "@/lib/types";
 import { useToast } from "../Toast";
 import { CopyButton } from "../CopyButton";
 
 export const SystemTab: React.FC = () => {
   const [healthList, setHealthList] = useState<ServiceHealth[]>([]);
-  const [selectedDoc, setSelectedDoc] = useState<string>("refund_policy");
+  const [documents, setDocuments] = useState<PolicyDocument[]>([]);
+  const [isLoadingDocs, setIsLoadingDocs] = useState<boolean>(true);
+  const [docError, setDocError] = useState<string | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const toast = useToast();
@@ -33,61 +36,32 @@ export const SystemTab: React.FC = () => {
     }
   };
 
+  const loadPoliciesData = async () => {
+    setIsLoadingDocs(true);
+    setDocError(null);
+    try {
+      const docs = await fetchPolicies();
+      setDocuments(docs);
+      if (docs.length > 0) {
+        setSelectedDoc((prev) => (docs.some((d) => d.id === prev) ? prev : docs[0].id));
+      }
+    } catch (err: any) {
+      console.error("Failed to load live policies:", err);
+      setDocError(err.message || "Failed to fetch policies from RAG engine");
+    } finally {
+      setIsLoadingDocs(false);
+    }
+  };
+
   useEffect(() => {
     loadHealth();
+    loadPoliciesData();
   }, []);
 
   const handleManualRefresh = async () => {
-    await loadHealth();
-    toast.success("Service Health Refreshed", "Live status polled across ports 8000, 8001, and 8002.");
+    await Promise.all([loadHealth(), loadPoliciesData()]);
+    toast.success("System Data Refreshed", "Live health and authoritative policies re-fetched.");
   };
-
-  const documents = [
-    {
-      id: "refund_policy",
-      title: "Refund & Return Policy (POL-REFUND-001)",
-      category: "Customer Operations Standard",
-      summary: "30-day standard return window, $500.00 supervisor approval threshold, apparel return condition rules.",
-      fullText: `# ACMECOMMERCE AUTHORITATIVE REFUND POLICY (POL-REFUND-001)
-
-## 1. General Return Window
-Customers may return items within 30 calendar days from the verified carrier delivery timestamp. Returns requested beyond 30 days are categorized as INELIGIBLE.
-
-## 2. High-Value Financial Threshold
-Refund requests for transactions with a total order value exceeding $500.00 USD cannot be automatically finalized. These orders require secondary supervisor authorization.
-
-## 3. Product Category Constraints
-- Standard Apparel & Electronics: Refundable within 30 days if unused.
-- Custom Engraved / Handcrafted Items: Non-refundable under catalog policy.
-- Software / Digital Codes: Non-refundable once delivered.`,
-    },
-    {
-      id: "chargeback_policy",
-      title: "Dispute & Chargeback Policy (POL-DISPUTE-001)",
-      category: "Financial Risk Protection",
-      summary: "Prohibits automatic refunds for transactions under active bank dispute or chargeback hold.",
-      fullText: `# DISPUTE & CHARGEBACK SAFEGUARDS (POL-DISPUTE-001)
-
-## 1. Active Dispute Holds
-If an order status indicates CHARGEBACK_HOLD or DISPUTED, the autonomous agent is strictly prohibited from approving a refund.
-
-## 2. Double-Refund Fraud Prevention
-The agent must never process double reimbursements. Orders already refunded via payment gateway cannot be refunded a second time.`,
-    },
-    {
-      id: "shipping_policy",
-      title: "Shipping & Delivery Policy (POL-SHIPPING-001)",
-      category: "Logistics & Fulfillment",
-      summary: "Carrier tracking verification, unfulfilled delivery claims, and package damage protocols.",
-      fullText: `# SHIPPING & CARRIER TIMELINES (POL-SHIPPING-001)
-
-## 1. Carrier Delivery Verification
-Carrier tracking status takes precedence over customer claims. If customer claims delivery but tracking indicates UNFULFILLED or PROCESSING, the inquiry is routed for manual verification.
-
-## 2. Transit Damage Protocols
-Damaged shipments verified with photo evidence or carrier transit damage tags are eligible for expedited replacement or store credit.`,
-    },
-  ];
 
   const filteredDocs = documents.filter(
     (d) =>
@@ -96,7 +70,9 @@ Damaged shipments verified with photo evidence or carrier transit damage tags ar
       d.fullText.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const currentDoc = documents.find((d) => d.id === selectedDoc) || documents[0];
+  const currentDoc = documents.find((d) => d.id === selectedDoc) || documents[0] || null;
+
+
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
@@ -305,57 +281,86 @@ Damaged shipments verified with photo evidence or carrier transit damage tags ar
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-          {/* Policy Document List */}
-          <div className="space-y-2.5">
-            {filteredDocs.length > 0 ? (
-              filteredDocs.map((doc) => {
-                const isSelected = selectedDoc === doc.id;
-                return (
-                  <motion.button
-                    key={doc.id}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={() => {
-                      setSelectedDoc(doc.id);
-                      toast.info("Viewing Policy", doc.title);
-                    }}
-                    className={`w-full p-3.5 sm:p-4 rounded-2xl text-left transition-all border ${
-                      isSelected
-                        ? "glass-panel-elevated ring-2 ring-indigo-500 shadow-md shadow-indigo-500/15 border-indigo-200"
-                        : "glass-card-interactive"
-                    }`}
-                  >
-                    <div className="text-xs sm:text-sm font-black text-slate-900">{doc.title}</div>
-                    <div className="text-[11px] font-bold text-indigo-600 mt-0.5">
-                      {doc.category}
-                    </div>
-                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed font-normal">
-                      {doc.summary}
-                    </p>
-                  </motion.button>
-                );
-              })
-            ) : (
-              <div className="p-6 text-center text-xs text-slate-400 font-medium bg-slate-50 rounded-2xl border border-slate-200">
-                No policy matching "{searchQuery}"
-              </div>
-            )}
+        {isLoadingDocs ? (
+          <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-6 h-6 animate-spin text-indigo-500" />
+            <p className="text-sm font-semibold">Loading live policies from RAG knowledge engine...</p>
           </div>
+        ) : docError && documents.length === 0 ? (
+          <div className="p-8 text-center bg-rose-50 border border-rose-200 rounded-2xl space-y-3">
+            <p className="text-sm font-bold text-rose-800">
+              Unable to load policies from RAG Knowledge Engine (Port 8000)
+            </p>
+            <p className="text-xs text-rose-600 font-medium">{docError}</p>
+            <button
+              onClick={loadPoliciesData}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-all shadow-sm"
+            >
+              Retry Connection
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+            {/* Policy Document List */}
+            <div className="space-y-2.5">
+              {filteredDocs.length > 0 ? (
+                filteredDocs.map((doc) => {
+                  const isSelected = selectedDoc === doc.id;
+                  return (
+                    <motion.button
+                      key={doc.id}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => {
+                        setSelectedDoc(doc.id);
+                        toast.info("Viewing Policy", doc.title);
+                      }}
+                      className={`w-full p-3.5 sm:p-4 rounded-2xl text-left transition-all border ${
+                        isSelected
+                          ? "glass-panel-elevated ring-2 ring-indigo-500 shadow-md shadow-indigo-500/15 border-indigo-200"
+                          : "glass-card-interactive"
+                      }`}
+                    >
+                      <div className="text-xs sm:text-sm font-black text-slate-900">{doc.title}</div>
+                      <div className="text-[11px] font-bold text-indigo-600 mt-0.5">
+                        {doc.category}
+                      </div>
+                      <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed font-normal">
+                        {doc.summary}
+                      </p>
+                    </motion.button>
+                  );
+                })
+              ) : (
+                <div className="p-6 text-center text-xs text-slate-400 font-medium bg-slate-50 rounded-2xl border border-slate-200">
+                  No policy matching "{searchQuery}"
+                </div>
+              )}
+            </div>
 
-          {/* Document Content Viewer */}
-          <div className="lg:col-span-2 p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed max-h-[360px] overflow-y-auto shadow-sm space-y-3">
-            <div className="border-b pb-2.5 border-slate-100 flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                Authoritative Text Preview
-              </span>
-              <CopyButton textToCopy={currentDoc.fullText} label="Copy Policy" />
-            </div>
-            <div className="whitespace-pre-wrap font-sans font-normal text-slate-700 leading-relaxed">
-              {currentDoc.fullText}
+            {/* Document Content Viewer */}
+            <div className="lg:col-span-2 p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed max-h-[360px] overflow-y-auto shadow-sm space-y-3">
+              {currentDoc ? (
+                <>
+                  <div className="border-b pb-2.5 border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                      Authoritative Text Preview
+                    </span>
+                    <CopyButton textToCopy={currentDoc.fullText} label="Copy Policy" />
+                  </div>
+                  <div className="whitespace-pre-wrap font-sans font-normal text-slate-700 leading-relaxed">
+                    {currentDoc.fullText}
+                  </div>
+                </>
+              ) : (
+                <div className="p-8 text-center text-xs text-slate-400 font-medium">
+                  Select a policy from the list to view its authoritative guidelines.
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
+
       </div>
     </div>
   );

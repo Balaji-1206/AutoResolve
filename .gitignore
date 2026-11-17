@@ -55,8 +55,10 @@ yarn-debug.log*
 backend/data/vector_cache/
 backend/data/*.bin
 backend/data/*.json
+services/rag-service/data/vector_cache/
 *.faiss
 *.bin
+*.npy
 .hf_cache/
 huggingface/
 

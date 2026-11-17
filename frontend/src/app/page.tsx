@@ -9,17 +9,53 @@ import { VisualTraceTab } from "@/components/tabs/VisualTraceTab";
 import { SupervisorTab } from "@/components/tabs/SupervisorTab";
 import { SystemTab } from "@/components/tabs/SystemTab";
 import { ToastProvider } from "@/components/Toast";
-import { ActiveTab, InvestigationResult } from "@/lib/types";
+import { ActiveTab, InvestigationResult, PendingCase } from "@/lib/types";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("playground");
   const [lastResult, setLastResult] = useState<InvestigationResult | null>(null);
   const [lastTicketText, setLastTicketText] = useState<string>("");
+  const [supervisorCases, setSupervisorCases] = useState<PendingCase[]>([]);
 
   const handleNewResult = (result: InvestigationResult, text: string) => {
     setLastResult(result);
     setLastTicketText(text);
+
+    // If the live investigation requires human supervisor review, automatically queue it
+    if (result.requires_human_review) {
+      setSupervisorCases((prev) => {
+        const ticketKey = result.ticket_id || "TCK-REVIEW";
+        if (prev.some((c) => c.ticketId === ticketKey && c.status === "pending")) {
+          return prev;
+        }
+
+        const newCase: PendingCase = {
+          id: `case-${Date.now()}`,
+          ticketId: ticketKey,
+          orderId: (result.operational_evidence?.order?.order_id as string) || "N/A",
+          customerName:
+            (result.operational_evidence?.customer?.name as string) ||
+            ((result.operational_evidence?.customer?.customer_id as string)
+              ? `Customer (${result.operational_evidence?.customer?.customer_id})`
+              : "Customer Inquiry"),
+          orderAmount:
+            typeof result.operational_evidence?.order?.total_amount === "number"
+              ? result.operational_evidence.order.total_amount
+              : 0,
+          customerMessage: text,
+          reasonForReview:
+            result.review_reasons?.length > 0
+              ? result.review_reasons.join("; ")
+              : result.reasoning_summary,
+          timestamp: "Just now",
+          status: "pending",
+        };
+
+        return [newCase, ...prev];
+      });
+    }
   };
+
 
   return (
     <ToastProvider>
@@ -80,7 +116,7 @@ export default function Home() {
           <TabsNavigation
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            pendingReviewCount={lastResult?.requires_human_review ? 1 : 1}
+            pendingReviewCount={supervisorCases.filter((c) => c.status === "pending").length}
           />
 
           {/* Active Tab Content with Smooth Transitions */}
@@ -124,7 +160,11 @@ export default function Home() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                  <SupervisorTab />
+                  <SupervisorTab
+                    cases={supervisorCases}
+                    setCases={setSupervisorCases}
+                    onNavigateToPlayground={() => setActiveTab("playground")}
+                  />
                 </motion.div>
               )}
 
