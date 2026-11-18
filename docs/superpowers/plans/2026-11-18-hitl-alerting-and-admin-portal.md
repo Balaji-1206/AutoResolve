@@ -35,13 +35,13 @@
 **Interfaces:**
 - Produces: `supervisor_alerts` table in SQLite, `dispatch_hitl_alert(ticket_id, reason, order_id, amount, customer_id)`, `list_supervisor_alerts(limit=50)`.
 
-- [ ] **Step 1: Write test for alert persistence and dispatch**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Update `scripts/init_database.py` with `supervisor_alerts` table and run it**
-- [ ] **Step 4: Implement alert DB functions in `services/resolution-service/app/database.py`**
-- [ ] **Step 5: Implement `services/resolution-service/app/alerts/dispatcher.py`**
-- [ ] **Step 6: Integrate alert dispatch call into `investigation.py` when `requires_human_review == True`**
-- [ ] **Step 7: Run test to verify it passes**
+- [x] **Step 1: Write test for alert persistence and dispatch**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Update `scripts/init_database.py` with `supervisor_alerts` table and run it**
+- [x] **Step 4: Implement alert DB functions in `services/resolution-service/app/database.py`**
+- [x] **Step 5: Implement `services/resolution-service/app/alerts/dispatcher.py`**
+- [x] **Step 6: Integrate alert dispatch call into `investigation.py` when `requires_human_review == True`**
+- [x] **Step 7: Run test to verify it passes**
 
 ---
 
@@ -58,11 +58,11 @@
   - `POST /api/v1/resolution/admin/reviews/{ticket_id}/decision` (apply supervisor decision: approve executes Phase 2 refund/label; reject updates notes)
   - `GET /api/v1/resolution/admin/alerts` (list dispatched asynchronous alerts)
 
-- [ ] **Step 1: Write test for admin review endpoints**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement `app/api/admin.py` with review listing, decision processing, and alert retrieval**
-- [ ] **Step 4: Mount admin router in `app/main.py`**
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 1: Write test for admin review endpoints**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement `app/api/admin.py` with review listing, decision processing, and alert retrieval**
+- [x] **Step 4: Mount admin router in `app/main.py`**
+- [x] **Step 5: Run test to verify it passes**
 
 ---
 
@@ -77,8 +77,8 @@
   - "Customer Care Portal" -> `/customer`
   - "Operations Admin Console" -> `/admin` (with live badge for pending escalations)
 
-- [ ] **Step 1: Implement `/` landing page with Apple iOS fluid aesthetics, mesh gradients, and spring animations**
-- [ ] **Step 2: Fetch pending review count to show real-time badge on Admin card**
+- [x] **Step 1: Implement `/` landing page with Apple iOS fluid aesthetics, mesh gradients, and spring animations**
+- [x] **Step 2: Fetch pending review count to show real-time badge on Admin card**
 
 ---
 
@@ -93,9 +93,9 @@
 **Interfaces:**
 - Produces: Clean customer-only experience with zero administrative tools. When escalated, shows reassurance card with no supervisor buttons.
 
-- [ ] **Step 1: Create `frontend/src/app/customer/page.tsx` hosting customer tabs**
-- [ ] **Step 2: Clean customer Header and Footer (remove all supervisor modals and triggers)**
-- [ ] **Step 3: Verify customer experience displays only customer actions**
+- [x] **Step 1: Create `frontend/src/app/customer/page.tsx` hosting customer tabs**
+- [x] **Step 2: Clean customer Header and Footer (remove all supervisor modals and triggers)**
+- [x] **Step 3: Verify customer experience displays only customer actions**
 
 ---
 
@@ -113,9 +113,9 @@
   - One-click "Approve Exception & Execute" (calls Phase 2 write endpoints) and "Decline"
   - Real-time Asynchronous Alert Dispatch Log (Webhook / Slack delivery status)
 
-- [ ] **Step 1: Add admin API methods to `frontend/src/lib/api.ts`**
-- [ ] **Step 2: Build `frontend/src/app/admin/page.tsx` using Apple iOS fluid glassmorphism**
-- [ ] **Step 3: Wire approval action to trigger authoritative write execution**
+- [x] **Step 1: Add admin API methods to `frontend/src/lib/api.ts`**
+- [x] **Step 2: Build `frontend/src/app/admin/page.tsx` using Apple iOS fluid glassmorphism**
+- [x] **Step 3: Wire approval action to trigger authoritative write execution**
 
 ---
 
@@ -127,6 +127,6 @@
 - Restart all microservice daemons
 - Test: Submit high-value ticket ($1,299.99), observe customer reassurance on `/customer`, check alert in `/admin`, approve review in `/admin`, and verify order status mutates to `REFUNDED` in SQLite.
 
-- [ ] **Step 1: Run frontend build and backend tests**
-- [ ] **Step 2: Restart services**
-- [ ] **Step 3: Verify end-to-end customer escalation -> HITL alert -> admin approval -> action execution**
+- [x] **Step 1: Run frontend build and backend tests**
+- [x] **Step 2: Restart services**
+- [x] **Step 3: Verify end-to-end customer escalation -> HITL alert -> admin approval -> action execution**

@@ -159,3 +159,88 @@ export async function fetchSavedTicketById(ticketId: string): Promise<SavedTicke
     return null;
   }
 }
+
+export interface AdminSupervisorReview {
+  ticket_id: string;
+  order_id: string | null;
+  customer_id: string | null;
+  customer_message: string;
+  decision: string;
+  status: string;
+  summary: string;
+  reasoning_summary: string;
+  requires_human_review: number;
+  review_reasons: string[];
+  duration_ms: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupervisorAlert {
+  alert_id: string;
+  ticket_id: string;
+  order_id: string | null;
+  customer_id: string | null;
+  channel: string;
+  severity: string;
+  title: string;
+  message: string;
+  status: string;
+  payload: string;
+  dispatched_at: string;
+}
+
+export interface SupervisorDecisionResult {
+  success: boolean;
+  ticket_id: string;
+  action: string;
+  status: string;
+  summary: string;
+  actions_taken: string[];
+  timestamp: string;
+}
+
+export async function fetchAdminPendingReviews(limit: number = 50): Promise<AdminSupervisorReview[]> {
+  try {
+    const res = await fetch(`${RESOLUTION_URL}/api/v1/resolution/admin/reviews?limit=${limit}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchAdminAlerts(limit: number = 50): Promise<SupervisorAlert[]> {
+  try {
+    const res = await fetch(`${RESOLUTION_URL}/api/v1/resolution/admin/alerts?limit=${limit}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function submitSupervisorDecision(
+  ticketId: string,
+  action: "APPROVE" | "REJECT",
+  reviewerId: string = "STORE-SUPERVISOR",
+  notes: string = ""
+): Promise<SupervisorDecisionResult> {
+  const res = await fetch(
+    `${RESOLUTION_URL}/api/v1/resolution/admin/reviews/${encodeURIComponent(ticketId)}/decision`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, reviewer_id: reviewerId, notes }),
+    }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Decision processing failed" }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}

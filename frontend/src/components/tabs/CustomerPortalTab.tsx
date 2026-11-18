@@ -137,7 +137,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
     toast.info("Account Loaded", `Browsing as ${profile.name} (${profile.customerId})`);
   };
 
-  const handleOrderFoundFromGateway = (order: LiveOrder) => {
+  const handleOrderFoundFromGateway = (order: LiveOrder, email?: string) => {
     setOrderId(order.order_id);
     setResult(null);
     setMessages([]);
@@ -282,10 +282,23 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
 
       {/* 🌟 2. Order Lookup & Customer Gateway */}
       <OrderLookupGateway
-        selectedProfile={selectedProfile}
-        onSelectProfile={handleSelectProfile}
         onOrderFound={handleOrderFoundFromGateway}
       />
+
+      {/* 🌟 Quick Ticket Tracking Banner */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50/90 to-purple-50/90 border border-indigo-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 text-indigo-950 font-medium">
+          <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+          <span>Already submitted a return request? Check live approval, return tracking, and print labels.</span>
+        </div>
+        <button
+          onClick={() => onSwitchTab("track")}
+          className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-700 font-black shadow-xs transition-all flex items-center gap-1.5 flex-shrink-0"
+        >
+          <span>Track Ticket Status</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
 
       {/* 🌟 3. Quick Issue Topic Pills */}
       <div className="space-y-2">

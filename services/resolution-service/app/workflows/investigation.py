@@ -133,7 +133,7 @@ class InvestigationWorkflow:
                     "customer_id": request.customer_id or op_customer.get("customer_id"),
                     "customer_message": request.ticket_text,
                     "decision": response.decision.value if hasattr(response.decision, "value") else str(response.decision),
-                    "status": response.status.value if hasattr(response.status, "value") else str(response.status),
+                    "status": "PENDING_REVIEW" if response.requires_human_review else (response.status.value if hasattr(response.status, "value") else str(response.status)),
                     "summary": response.summary,
                     "reasoning_summary": response.reasoning_summary,
                     "requires_human_review": 1 if response.requires_human_review else 0,
@@ -153,6 +153,20 @@ class InvestigationWorkflow:
                     },
                     details=f"Decision: {response.decision.value}. Actions: {'; '.join(response.actions_taken) if response.actions_taken else 'None'}.",
                 )
+
+                # Dispatch asynchronous HITL supervisor alert if human review is required
+                if response.requires_human_review:
+                    try:
+                        from app.alerts.dispatcher import dispatch_hitl_alert
+                        await dispatch_hitl_alert(
+                            ticket_id=response.ticket_id,
+                            order_id=request.order_id or op_order.get("order_id"),
+                            customer_id=request.customer_id or op_customer.get("customer_id"),
+                            reason="; ".join(response.review_reasons) if response.review_reasons else response.reasoning_summary,
+                            amount=float(op_order.get("total_amount", 0.0) or 0.0) if op_order else None,
+                        )
+                    except Exception as alert_err:
+                        logger.warning("Failed to dispatch asynchronous HITL alert: %s", alert_err)
             except Exception as db_err:
                 logger.warning("Failed to persist ticket to SQLite: %s", db_err)
 

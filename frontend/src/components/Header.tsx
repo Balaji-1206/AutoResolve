@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Sparkles, ShieldCheck, Cpu, Activity, Bell, ShoppingBag } from "lucide-react";
 import { fetchAllServiceHealth } from "@/lib/api";
 import { ServiceHealth } from "@/lib/types";
@@ -36,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         {/* Customer Store Brand Group */}
-        <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3 group cursor-pointer" title="Return to Portal Selector">
           <motion.div
             whileHover={{ scale: 1.05, rotate: 4 }}
             whileTap={{ scale: 0.95 }}
@@ -47,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
           </motion.div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 leading-none">
+              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 leading-none group-hover:text-indigo-600 transition-colors">
                 AcmeCommerce
               </span>
               <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm leading-tight">
@@ -58,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
               24/7 Automated Order & Return Resolution
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Status Indicators & Manager Review Notification */}
         <div className="flex items-center gap-2 sm:gap-3">

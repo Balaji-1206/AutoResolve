@@ -60,7 +60,8 @@ export type ActiveTab =
   | "supervisor"
   | "playground"
   | "visualizer"
-  | "system";
+  | "system"
+  | "track";
 
 
 export interface ServiceHealth {

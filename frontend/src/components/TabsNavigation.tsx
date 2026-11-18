@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Package, BookOpen, Bell } from "lucide-react";
+import { Sparkles, Package, BookOpen, Bell, SearchCheck } from "lucide-react";
 import { ActiveTab } from "@/lib/types";
 
 interface TabsNavigationProps {
@@ -38,6 +38,12 @@ export const TabsNavigation: React.FC<TabsNavigationProps> = ({
       description: "Delivery Status & Return Windows",
     },
     {
+      id: "track" as ActiveTab,
+      label: "Track My Request",
+      icon: SearchCheck,
+      description: "Lookup Ticket & Refund Progress",
+    },
+    {
       id: "policies" as ActiveTab,
       label: "Store Policies & FAQs",
       icon: BookOpen,
@@ -51,7 +57,7 @@ export const TabsNavigation: React.FC<TabsNavigationProps> = ({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.05 }}
-        className="glass-panel p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 shadow-sm border border-white/90"
+        className="glass-panel p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 shadow-sm border border-white/90"
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;

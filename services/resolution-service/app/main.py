@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from app.api.resolution import router as resolution_router
+from app.api.admin import router as admin_router
 from app.clients.rag_client import RAGClient
 from app.clients.tool_client import ToolClient
 from app.workflows.investigation import InvestigationWorkflow
@@ -82,6 +83,7 @@ app.add_middleware(
 
 # Register API Routers
 app.include_router(resolution_router, prefix="/api/v1")
+app.include_router(admin_router)
 
 
 @app.get("/", tags=["General"])

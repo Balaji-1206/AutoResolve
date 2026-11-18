@@ -151,3 +151,77 @@ def list_tickets(limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
     rows = cursor.fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def save_supervisor_alert(alert: Dict[str, Any]) -> None:
+    """Inserts an asynchronous supervisor alert record into SQLite."""
+    now_iso = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_db_connection()
+    with conn:
+        conn.execute("""
+            INSERT OR REPLACE INTO supervisor_alerts (
+                alert_id, ticket_id, order_id, customer_id, channel,
+                severity, title, message, status, payload, dispatched_at
+            ) VALUES (
+                :alert_id, :ticket_id, :order_id, :customer_id, :channel,
+                :severity, :title, :message, :status, :payload, :dispatched_at
+            )
+        """, {
+            "alert_id": alert.get("alert_id"),
+            "ticket_id": alert.get("ticket_id"),
+            "order_id": alert.get("order_id"),
+            "customer_id": alert.get("customer_id"),
+            "channel": alert.get("channel", "slack:#support-escalations"),
+            "severity": alert.get("severity", "MEDIUM"),
+            "title": alert.get("title", "Supervisor Review Required"),
+            "message": alert.get("message", ""),
+            "status": alert.get("status", "DELIVERED"),
+            "payload": alert.get("payload", "{}"),
+            "dispatched_at": alert.get("dispatched_at", now_iso),
+        })
+    conn.close()
+
+
+def list_supervisor_alerts(limit: int = 50) -> List[Dict[str, Any]]:
+    """Retrieves recent supervisor alerts in reverse chronological order."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM supervisor_alerts ORDER BY dispatched_at DESC LIMIT ?;",
+        (limit,),
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_pending_reviews(limit: int = 50) -> List[Dict[str, Any]]:
+    """Retrieves tickets requiring human supervisor review."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM tickets 
+        WHERE requires_human_review = 1 
+        ORDER BY updated_at DESC LIMIT ?;
+    """, (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def update_ticket_review_status(
+    ticket_id: str,
+    status: str,
+    decision: str,
+    summary: str,
+) -> None:
+    """Updates a ticket's status and decision following supervisor review."""
+    now_iso = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_db_connection()
+    with conn:
+        conn.execute("""
+            UPDATE tickets 
+            SET status = ?, decision = ?, summary = ?, requires_human_review = 0, updated_at = ?
+            WHERE ticket_id = ?;
+        """, (status, decision, summary, now_iso, ticket_id.strip().upper()))
+    conn.close()

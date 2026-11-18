@@ -125,6 +125,20 @@ def create_tables(conn: sqlite3.Connection) -> None:
             FOREIGN KEY (customer_id) REFERENCES customers (customer_id)
         );
 
+        CREATE TABLE IF NOT EXISTS supervisor_alerts (
+            alert_id TEXT PRIMARY KEY,
+            ticket_id TEXT NOT NULL,
+            order_id TEXT,
+            customer_id TEXT,
+            channel TEXT NOT NULL,
+            severity TEXT DEFAULT 'MEDIUM',
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            status TEXT DEFAULT 'DELIVERED',
+            payload TEXT,
+            dispatched_at TEXT NOT NULL
+        );
+
         -- Performance Indexes
         CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders (customer_id);
         CREATE INDEX IF NOT EXISTS idx_payments_order ON payments (order_id);
@@ -134,6 +148,8 @@ def create_tables(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_tickets_customer ON tickets (customer_id);
         CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets (status);
         CREATE INDEX IF NOT EXISTS idx_audit_ticket ON resolution_audit_logs (ticket_id);
+        CREATE INDEX IF NOT EXISTS idx_alerts_ticket ON supervisor_alerts (ticket_id);
+        CREATE INDEX IF NOT EXISTS idx_alerts_status ON supervisor_alerts (status);
         """)
     logger.info("Database schemas and indexes initialized successfully.")
 
