@@ -38,7 +38,7 @@ class QwenGenerator:
         timeout: Optional[httpx.Timeout] = None
     ):
         self.base_url = (
-            base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+            base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         ).rstrip("/")
         self.model = model or os.getenv("OLLAMA_MODEL", "qwen3:8b")
         self.timeout = timeout or httpx.Timeout(connect=5.0, read=90.0, write=10.0, pool=5.0)
@@ -69,6 +69,44 @@ class QwenGenerator:
 
         return "COMPANY KNOWLEDGE CONTEXT:\n\n" + "\n".join(formatted_blocks)
 
+    def _prepare_request(self, query: str, retrieved_chunks: List[Dict[str, Any]], temperature: float) -> tuple[str, Dict[str, Any]]:
+        context_str = self.build_context_prompt(retrieved_chunks)
+        user_message = f"{context_str}\n\nCustomer Question: {query}"
+
+        if "/v1" in self.base_url:
+            url = f"{self.base_url}/chat/completions"
+            payload = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_message}
+                ],
+                "temperature": temperature,
+                "stream": False
+            }
+        else:
+            url = f"{self.base_url}/api/chat" if not self.base_url.endswith("/api/chat") else self.base_url
+            payload = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_message}
+                ],
+                "options": {
+                    "num_ctx": 2048,
+                    "temperature": temperature
+                },
+                "stream": False
+            }
+        return url, payload
+
+    def _extract_content(self, data: Dict[str, Any]) -> str:
+        if "message" in data:
+            return data["message"].get("content", "").strip()
+        if "choices" in data and len(data["choices"]) > 0:
+            return data["choices"][0].get("message", {}).get("content", "").strip()
+        return ""
+
     def generate(
         self,
         query: str,
@@ -76,22 +114,9 @@ class QwenGenerator:
         temperature: float = 0.1
     ) -> Dict[str, Any]:
         """
-        Synchronous call to Ollama OpenAI-compatible endpoint.
+        Synchronous call to Ollama endpoint.
         """
-        context_str = self.build_context_prompt(retrieved_chunks)
-        user_message = f"{context_str}\n\nCustomer Question: {query}"
-
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_message}
-            ],
-            "temperature": temperature,
-            "stream": False
-        }
-
-        url = f"{self.base_url}/chat/completions"
+        url, payload = self._prepare_request(query, retrieved_chunks, temperature)
 
         try:
             with httpx.Client(timeout=self.timeout) as client:
@@ -99,7 +124,7 @@ class QwenGenerator:
                 response.raise_for_status()
                 data = response.json()
 
-            answer = data["choices"][0]["message"]["content"].strip()
+            answer = self._extract_content(data)
             cited_ids = self.extract_citations(answer)
 
             return {
@@ -134,22 +159,9 @@ class QwenGenerator:
         temperature: float = 0.1
     ) -> Dict[str, Any]:
         """
-        Asynchronous call to Ollama OpenAI-compatible endpoint for FastAPI async endpoints.
+        Asynchronous call to Ollama endpoint for FastAPI async endpoints.
         """
-        context_str = self.build_context_prompt(retrieved_chunks)
-        user_message = f"{context_str}\n\nCustomer Question: {query}"
-
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_message}
-            ],
-            "temperature": temperature,
-            "stream": False
-        }
-
-        url = f"{self.base_url}/chat/completions"
+        url, payload = self._prepare_request(query, retrieved_chunks, temperature)
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -157,7 +169,7 @@ class QwenGenerator:
                 response.raise_for_status()
                 data = response.json()
 
-            answer = data["choices"][0]["message"]["content"].strip()
+            answer = self._extract_content(data)
             cited_ids = self.extract_citations(answer)
 
             return {

@@ -109,6 +109,71 @@ class ToolClient:
         """
         return await self._fetch_entity("refund", "/api/v1/tools/refunds", refund_id)
 
+    async def execute_refund(
+        self,
+        order_id: str,
+        customer_id: str,
+        amount: float,
+        reason: str,
+        refund_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes authoritative payment gateway refund via Tool Service.
+        """
+        url = f"{self.base_url}/api/v1/tools/refunds/execute"
+        payload = {
+            "order_id": order_id,
+            "customer_id": customer_id,
+            "amount": amount,
+            "reason": reason,
+            "refund_id": refund_id,
+        }
+        try:
+            resp = await self._client.post(url, json=payload)
+            if resp.status_code == 200:
+                return resp.json()
+            raise ServiceUnavailableError("Tool Service", f"Refund execution failed: HTTP {resp.status_code} {resp.text}")
+        except Exception as err:
+            raise ServiceUnavailableError("Tool Service", f"Refund execution error: {str(err)}")
+
+    async def update_order_status(
+        self,
+        order_id: str,
+        status: str,
+        reason: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Mutates order lifecycle status via Tool Service.
+        """
+        url = f"{self.base_url}/api/v1/tools/orders/{order_id}/update-status"
+        payload = {"status": status, "reason": reason}
+        try:
+            resp = await self._client.post(url, json=payload)
+            if resp.status_code == 200:
+                return resp.json()
+            raise ServiceUnavailableError("Tool Service", f"Order status update failed: HTTP {resp.status_code} {resp.text}")
+        except Exception as err:
+            raise ServiceUnavailableError("Tool Service", f"Order status update error: {str(err)}")
+
+    async def generate_shipping_label(
+        self,
+        order_id: str,
+        customer_id: str,
+        carrier: str = "UPS Ground",
+    ) -> Dict[str, Any]:
+        """
+        Generates return shipping label voucher via Tool Service.
+        """
+        url = f"{self.base_url}/api/v1/tools/shipping/generate-label"
+        payload = {"order_id": order_id, "customer_id": customer_id, "carrier": carrier}
+        try:
+            resp = await self._client.post(url, json=payload)
+            if resp.status_code == 200:
+                return resp.json()
+            raise ServiceUnavailableError("Tool Service", f"Shipping label generation failed: HTTP {resp.status_code} {resp.text}")
+        except Exception as err:
+            raise ServiceUnavailableError("Tool Service", f"Shipping label error: {str(err)}")
+
     async def query_tools(self, query: str) -> Dict[str, Any]:
         """
         Submits query to Tool Service autonomous tool-calling agent endpoint.

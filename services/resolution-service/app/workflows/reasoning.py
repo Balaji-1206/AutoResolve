@@ -52,11 +52,11 @@ class QwenReasoner:
         self,
         base_url: Optional[str] = None,
         model: Optional[str] = None,
-        timeout: float = 30.0,
+        timeout: float = 90.0,
         client: Optional[httpx.AsyncClient] = None,
     ):
         self.base_url = (
-            base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+            base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         ).rstrip("/")
         self.model = model or os.getenv("OLLAMA_MODEL", "qwen3:8b")
         self.timeout = timeout
@@ -121,19 +121,40 @@ class QwenReasoner:
 
         prompt = self.build_prompt(evidence, customer_text)
         try:
-            resp = await self._client.post(
-                f"{self.base_url}/chat/completions",
-                json={
+            if "/v1" in self.base_url:
+                target_url = f"{self.base_url}/chat/completions"
+                payload = {
                     "model": self.model,
                     "messages": [
                         {"role": "system", "content": SYSTEM_PROMPT},
                         {"role": "user", "content": prompt},
                     ],
                     "temperature": 0.1,
-                },
-            )
+                }
+            else:
+                target_url = f"{self.base_url}/api/chat" if not self.base_url.endswith("/api/chat") else self.base_url
+                payload = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "options": {
+                        "num_ctx": 2048,
+                        "temperature": 0.1,
+                    },
+                    "stream": False,
+                }
+
+            resp = await self._client.post(target_url, json=payload)
             if resp.status_code == 200:
-                content = resp.json()["choices"][0]["message"]["content"].strip()
+                data = resp.json()
+                if "message" in data:
+                    content = data["message"].get("content", "").strip()
+                elif "choices" in data and len(data["choices"]) > 0:
+                    content = data["choices"][0].get("message", {}).get("content", "").strip()
+                else:
+                    content = ""
                 parsed = self._extract_json(content)
                 if parsed:
                     raw_dec = parsed.get("decision", "").upper()

@@ -85,6 +85,36 @@ export interface PendingCase {
   notes?: string;
 }
 
+export interface SavedTicket {
+  ticket_id: string;
+  order_id?: string | null;
+  customer_id?: string | null;
+  customer_message: string;
+  decision: BusinessDecision | string;
+  status: string;
+  summary: string;
+  reasoning_summary: string;
+  requires_human_review: number;
+  review_reasons?: string | null;
+  duration_ms?: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SavedTicketDetail {
+  ticket: SavedTicket;
+  audit_logs: Array<{
+    id: number;
+    ticket_id: string;
+    node_name?: string | null;
+    action: string;
+    policy_citations?: string | null;
+    operational_snapshot?: string | null;
+    details?: string | null;
+    timestamp: string;
+  }>;
+}
+
 export interface SupportTicket {
   id: string;
   ticketNumber: string;

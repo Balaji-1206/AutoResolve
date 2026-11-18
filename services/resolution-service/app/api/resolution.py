@@ -6,7 +6,9 @@ Endpoint:
 """
 
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from typing import Any, Dict, List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from app.database import get_ticket, get_ticket_audit_logs, list_tickets
 from app.models.resolution import InvestigationRequest, InvestigationResponse
 from app.workflows.investigation import InvestigationWorkflow
 
@@ -58,3 +60,36 @@ async def investigate_ticket(
     )
 
     return response
+
+
+@router.get(
+    "/tickets",
+    summary="List Persisted Tickets",
+    description="Retrieves persistent ticket records from SQLite, ordered chronologically by latest activity.",
+)
+async def get_tickets(
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> List[Dict[str, Any]]:
+    """Fetches list of saved ticket records."""
+    return list_tickets(limit=limit, offset=offset)
+
+
+@router.get(
+    "/tickets/{ticket_id}",
+    summary="Get Ticket Details & Audit Trail",
+    description="Fetches a persisted ticket by ID along with its full multi-step investigation audit logs.",
+)
+async def get_ticket_by_id(ticket_id: str) -> Dict[str, Any]:
+    """Fetches single ticket with audit trail."""
+    ticket = get_ticket(ticket_id)
+    if not ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Ticket '{ticket_id}' not found.",
+        )
+    audit_logs = get_ticket_audit_logs(ticket_id)
+    return {
+        "ticket": ticket,
+        "audit_logs": audit_logs,
+    }

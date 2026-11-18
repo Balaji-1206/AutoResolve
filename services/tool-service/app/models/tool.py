@@ -89,3 +89,65 @@ class ToolQueryRequest(BaseModel):
     query: str = Field(..., description="Customer operational inquiry", min_length=2)
 
 
+# =============================================================================
+# Action Execution Models (Phase 2 Automated Mutation)
+# =============================================================================
+
+class RefundExecutionRequest(BaseModel):
+    """Payload to trigger an authoritative automated refund execution."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    order_id: str = Field(..., description="Unique Order Identifier (e.g. ORD-1001)")
+    customer_id: str = Field(..., description="Associated Customer Identifier (e.g. CUS-1001)")
+    amount: float = Field(..., gt=0.0, description="Refund monetary amount")
+    reason: str = Field(..., description="Business or policy reason for refund execution")
+    refund_id: Optional[str] = Field(default=None, description="Optional pre-allocated refund ID")
+    payment_method: Optional[str] = Field(default="ORIGINAL_PAYMENT_METHOD", description="Destination payment method")
+
+
+class RefundExecutionResponse(BaseModel):
+    """Output confirming gateway refund execution and database persistence."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    refund_id: str
+    order_id: str
+    customer_id: str
+    amount: float
+    status: str = Field(default="PROCESSED")
+    gateway_transaction_id: str
+    processed_at: str
+    message: str
+
+
+class OrderStatusUpdateRequest(BaseModel):
+    """Payload to update lifecycle status of an operational order."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    status: str = Field(..., description="New lifecycle status (e.g. RETURN_INITIATED, REFUNDED)")
+    reason: Optional[str] = Field(default=None, description="Operational explanation for update")
+
+
+class ShippingLabelRequest(BaseModel):
+    """Payload to generate an official prepaid return shipping label."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    order_id: str = Field(..., description="Unique Order Identifier")
+    customer_id: str = Field(..., description="Unique Customer Identifier")
+    carrier: str = Field(default="UPS Ground", description="Shipping carrier service name")
+
+
+class ShippingLabelResponse(BaseModel):
+    """Output containing return shipping label voucher details and tracking number."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    shipment_id: str
+    order_id: str
+    customer_id: str
+    carrier: str
+    tracking_number: str
+    status: str = Field(default="LABEL_CREATED")
+    label_url: str
+    created_at: str
+
+
+

@@ -1,4 +1,4 @@
-import { InvestigationResult, ServiceHealth } from "./types";
+import { InvestigationResult, ServiceHealth, SavedTicket, SavedTicketDetail } from "./types";
 
 const RESOLUTION_URL = process.env.NEXT_PUBLIC_RESOLUTION_URL || "http://localhost:8002";
 const RAG_URL = process.env.NEXT_PUBLIC_RAG_URL || "http://localhost:8000";
@@ -133,4 +133,29 @@ export async function fetchAllServiceHealth(): Promise<ServiceHealth[]> {
     checkServiceHealth("Operational Data & Tools", TOOL_URL, 8001),
     checkServiceHealth("Resolution & LangGraph Orchestrator", RESOLUTION_URL, 8002),
   ]);
+}
+
+export async function fetchSavedTickets(limit: number = 20): Promise<SavedTicket[]> {
+  try {
+    const res = await fetch(`${RESOLUTION_URL}/api/v1/resolution/tickets?limit=${limit}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchSavedTicketById(ticketId: string): Promise<SavedTicketDetail | null> {
+  try {
+    const cleanId = ticketId.trim().toUpperCase();
+    const res = await fetch(`${RESOLUTION_URL}/api/v1/resolution/tickets/${encodeURIComponent(cleanId)}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }

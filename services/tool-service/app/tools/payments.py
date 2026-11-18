@@ -8,7 +8,9 @@ import json
 import os
 from pathlib import Path
 import re
+import sqlite3
 from typing import Dict, Optional
+from app.database import get_db_connection
 from app.models.tool import PaymentResponse
 
 
@@ -18,6 +20,20 @@ class PaymentNotFoundError(Exception):
 
 
 _PAYMENTS_CACHE: Optional[Dict[str, PaymentResponse]] = None
+
+
+def _row_to_payment(row: sqlite3.Row) -> PaymentResponse:
+    """Maps a SQLite payment row to the typed PaymentResponse model."""
+    return PaymentResponse(
+        payment_id=row["payment_id"],
+        order_id=row["order_id"],
+        customer_id=row["customer_id"],
+        amount=float(row["amount"]),
+        status=row["status"],
+        payment_method_type=row["payment_method_type"],
+        failure_reason=row["failure_reason"],
+        created_at=row["created_at"],
+    )
 
 
 def _find_payments_file() -> Path:
@@ -100,6 +116,19 @@ def get_payment(payment_id: str) -> PaymentResponse:
     if not re.match(r"^PAY-\d+$", clean_id):
         raise ValueError(f"Invalid payment ID format: '{payment_id}'. Expected format: 'PAY-XXXX'")
 
+    # Check SQLite database first
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM payments WHERE payment_id = ?;", (clean_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return _row_to_payment(row)
+    except Exception:
+        pass
+
+    # Fallback to in-memory JSON cache
     index = _load_payments_index()
     if clean_id not in index:
         raise PaymentNotFoundError(f"Payment '{clean_id}' not found in operational database.")

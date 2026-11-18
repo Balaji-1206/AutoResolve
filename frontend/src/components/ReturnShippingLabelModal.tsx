@@ -23,6 +23,8 @@ interface ReturnShippingLabelModalProps {
   customerName: string;
   itemTitle?: string;
   refundAmount?: number;
+  trackingNumber?: string;
+  carrier?: string;
 }
 
 export const ReturnShippingLabelModal: React.FC<ReturnShippingLabelModalProps> = ({
@@ -32,12 +34,16 @@ export const ReturnShippingLabelModal: React.FC<ReturnShippingLabelModalProps> =
   customerName,
   itemTitle = "AcmeCommerce Order Item",
   refundAmount = 120.0,
+  trackingNumber: trackingNumberProp,
+  carrier = "UPS Ground",
 }) => {
   const toast = useToast();
   if (!isOpen) return null;
 
   const rmaNumber = `RMA-${orderId.replace("ORD-", "")}-${Math.floor(100000 + Math.random() * 900000)}`;
-  const trackingNumber = `1Z ${orderId.replace("ORD-", "99")}${Math.floor(100 + Math.random() * 899)} 02 ${Math.floor(1000 + Math.random() * 8999)} ${Math.floor(1000 + Math.random() * 8999)}`;
+  const trackingNumber =
+    trackingNumberProp ||
+    `1Z ${orderId.replace("ORD-", "99")}${Math.floor(100 + Math.random() * 899)} 02 ${Math.floor(1000 + Math.random() * 8999)} ${Math.floor(1000 + Math.random() * 8999)}`;
 
   const handlePrint = () => {
     window.print();
@@ -71,7 +77,7 @@ export const ReturnShippingLabelModal: React.FC<ReturnShippingLabelModalProps> =
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Authorization #{rmaNumber} • Carrier: UPS Ground
+                Authorization #{rmaNumber} • Carrier: {carrier}
               </p>
             </div>
           </div>
@@ -92,8 +98,8 @@ export const ReturnShippingLabelModal: React.FC<ReturnShippingLabelModalProps> =
           {/* Carrier Header */}
           <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3">
             <div>
-              <div className="text-xl sm:text-2xl font-black tracking-tight font-sans">
-                UPS GROUND
+              <div className="text-xl sm:text-2xl font-black tracking-tight font-sans uppercase">
+                {carrier}
               </div>
               <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
                 AcmeCommerce Authorized Return Service

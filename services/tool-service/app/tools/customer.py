@@ -8,7 +8,9 @@ import json
 import os
 from pathlib import Path
 import re
+import sqlite3
 from typing import Dict, Optional
+from app.database import get_db_connection
 from app.models.tool import CustomerResponse
 
 
@@ -18,6 +20,19 @@ class CustomerNotFoundError(Exception):
 
 
 _CUSTOMERS_CACHE: Optional[Dict[str, CustomerResponse]] = None
+
+
+def _row_to_customer(row: sqlite3.Row) -> CustomerResponse:
+    """Maps a SQLite customer row to the typed CustomerResponse model."""
+    return CustomerResponse(
+        customer_id=row["customer_id"],
+        name=row["name"],
+        email=row["email"],
+        account_status=row["account_status"] or "ACTIVE",
+        billing_zip=row["billing_zip"] or "",
+        phone_last4=row["phone_last4"] or "",
+        created_at=row["created_at"],
+    )
 
 
 def _find_customers_file() -> Path:
@@ -99,6 +114,19 @@ def get_customer(customer_id: str) -> CustomerResponse:
     if not re.match(r"^CUS-\d+$", clean_id):
         raise ValueError(f"Invalid customer ID format: '{customer_id}'. Expected format: 'CUS-XXXX'")
 
+    # Check SQLite database first
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM customers WHERE customer_id = ?;", (clean_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return _row_to_customer(row)
+    except Exception:
+        pass
+
+    # Fallback to in-memory JSON cache
     index = _load_customers_index()
     if clean_id not in index:
         raise CustomerNotFoundError(f"Customer '{clean_id}' not found in operational database.")

@@ -26,11 +26,13 @@ import {
   Printer,
   MessageSquare,
   CornerDownRight,
+  CreditCard,
+  Truck,
 } from "lucide-react";
 import { CUSTOMER_PROFILES, CustomerProfile } from "@/lib/customerProfiles";
-import { investigateTicket, LiveOrder } from "@/lib/api";
+import { investigateTicket, fetchSavedTickets, LiveOrder } from "@/lib/api";
 import { generateCustomerResponse } from "@/lib/customerResponse";
-import { InvestigationResult, ActiveTab } from "@/lib/types";
+import { InvestigationResult, ActiveTab, SavedTicket } from "@/lib/types";
 import { OrderLookupGateway } from "../OrderLookupGateway";
 import { ReturnShippingLabelModal } from "../ReturnShippingLabelModal";
 import { useToast } from "../Toast";
@@ -79,7 +81,34 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
   const [followUpText, setFollowUpText] = useState<string>("");
   const [isFollowUpLoading, setIsFollowUpLoading] = useState<boolean>(false);
 
+  // 🗄️ Persistent Database Tickets (SQLite)
+  const [savedTickets, setSavedTickets] = useState<SavedTicket[]>([]);
+
+  const loadSavedTickets = async () => {
+    try {
+      const tickets = await fetchSavedTickets(15);
+      setSavedTickets(tickets);
+    } catch {
+      // Graceful fallback
+    }
+  };
+
+  React.useEffect(() => {
+    loadSavedTickets();
+  }, []);
+
   const toast = useToast();
+
+  // Extract tracking number and refund gateway ID if actions were executed
+  const returnLabelAction = result?.actions_taken?.find((a) => a.startsWith("RETURN_LABEL_ISSUED"));
+  const trackingMatch = returnLabelAction?.match(/Tracking #([^\)]+)/);
+  const executedTrackingNumber = trackingMatch ? trackingMatch[1] : undefined;
+  const carrierMatch = returnLabelAction?.match(/Carrier ([^(]+)/);
+  const executedCarrier = carrierMatch ? carrierMatch[1].trim() : "UPS Ground";
+
+  const refundAction = result?.actions_taken?.find((a) => a.startsWith("REFUND_EXECUTED"));
+  const gatewayMatch = refundAction?.match(/via (tx_[^\)]+)/);
+  const executedGatewayTx = gatewayMatch ? gatewayMatch[1] : undefined;
 
   const handleSelectProfile = (profile: CustomerProfile) => {
     setSelectedProfile(profile);
@@ -161,6 +190,9 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
       } else {
         toast.info("Resolution Complete", "Inquiry processed against store policy guidelines.");
       }
+
+      // Refresh persistent ticket records from SQLite
+      loadSavedTickets();
     } catch (err: any) {
       toast.error("Resolution Unavailable", err.message || "Failed to reach resolution service.");
     } finally {
@@ -397,6 +429,72 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
               </div>
             </div>
           </div>
+
+          {/* 🗄️ Persistent Database Tickets (SQLite) */}
+          <div className="glass-panel p-5 rounded-2xl border border-white/80 shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b pb-2.5 border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                <span className="font-black text-xs text-slate-900 tracking-tight">
+                  Inquiry History on Record
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                SQLite WAL Mode
+              </span>
+            </div>
+
+            {savedTickets.length === 0 ? (
+              <div className="text-center py-4 text-xs text-slate-400 font-medium">
+                No past inquiries recorded in database yet.
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {savedTickets.map((t) => (
+                  <div
+                    key={t.ticket_id}
+                    onClick={() => {
+                      if (t.order_id) setOrderId(t.order_id);
+                      setInquiryText(t.customer_message);
+                      toast.info("Ticket Loaded", `Reviewing ${t.ticket_id}`);
+                    }}
+                    className="p-3 rounded-xl bg-slate-50/80 hover:bg-indigo-50/70 border border-slate-200/60 hover:border-indigo-200 transition-all cursor-pointer group space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5 font-black text-slate-900">
+                        <span>{t.ticket_id}</span>
+                        {t.order_id && (
+                          <span className="text-slate-400 font-semibold text-[10px]">
+                            • {t.order_id}
+                          </span>
+                        )}
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded-full font-black text-[9px] uppercase tracking-wider ${
+                          t.decision === "ELIGIBLE"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : t.decision === "INELIGIBLE"
+                            ? "bg-rose-100 text-rose-800"
+                            : t.decision === "NEEDS_HUMAN_REVIEW"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {t.decision.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 line-clamp-1 font-medium">
+                      {t.summary || t.customer_message}
+                    </p>
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-semibold pt-0.5">
+                      <span>{t.created_at}</span>
+                      <span className="text-indigo-600 group-hover:underline">Load to review &rarr;</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Column: Live Resolution & Multi-Turn Dialogue (lg:col-span-7) */}
@@ -433,6 +531,51 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                     Your order {orderId} meets all requirements under our standard 30-day return policy. A full refund of <strong className="text-slate-900 font-bold">${result.operational_evidence?.order?.total_amount?.toFixed(2) || "120.00"}</strong> has been scheduled to your original payment method.
                   </p>
 
+                  {/* ⚡ Automated Action Execution Status */}
+                  {result.actions_taken && result.actions_taken.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-300/80 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                          <span className="text-[11px] font-black uppercase tracking-wider text-emerald-900">
+                            Authoritative Write Actions Executed
+                          </span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 text-emerald-900">
+                          Database State Mutated
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        {executedGatewayTx && (
+                          <div className="p-2.5 rounded-xl bg-white/90 border border-emerald-200 flex items-center justify-between gap-2 shadow-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <CreditCard className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                              <div className="min-w-0">
+                                <div className="text-[10px] font-bold text-slate-500 truncate">GATEWAY REFUND TX</div>
+                                <div className="font-mono font-bold text-[11px] text-slate-800 truncate">{executedGatewayTx}</div>
+                              </div>
+                            </div>
+                            <CopyButton textToCopy={executedGatewayTx} />
+                          </div>
+                        )}
+
+                        {executedTrackingNumber && (
+                          <div className="p-2.5 rounded-xl bg-white/90 border border-emerald-200 flex items-center justify-between gap-2 shadow-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Truck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                              <div className="min-w-0">
+                                <div className="text-[10px] font-bold text-slate-500 truncate">CARRIER TRACKING #</div>
+                                <div className="font-mono font-bold text-[11px] text-slate-800 truncate">{executedTrackingNumber}</div>
+                              </div>
+                            </div>
+                            <CopyButton textToCopy={executedTrackingNumber} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="p-4 rounded-2xl bg-white border border-emerald-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
@@ -443,7 +586,7 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
                           Prepaid Return Shipping Voucher
                         </div>
                         <div className="text-[11px] text-slate-500 font-medium">
-                          Carrier: UPS Ground • Valid for 7 calendar days
+                          Carrier: {executedCarrier} • Valid for 7 calendar days
                         </div>
                       </div>
                     </div>
@@ -657,6 +800,8 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
         customerName={selectedProfile.name}
         itemTitle={selectedProfile.recentOrderTitle}
         refundAmount={result?.operational_evidence?.order?.total_amount || selectedProfile.orderAmount}
+        trackingNumber={executedTrackingNumber}
+        carrier={executedCarrier}
       />
     </div>
   );

@@ -20,9 +20,9 @@ class RAGClient:
     def __init__(
         self,
         base_url: Optional[str] = None,
-        timeout: float = 20.0,
+        timeout: float = 60.0,
         client: Optional[httpx.AsyncClient] = None,
-        max_retries: int = 1,
+        max_retries: int = 0,
     ):
         self.base_url = (
             base_url or os.getenv("RAG_SERVICE_URL", "http://localhost:8000")

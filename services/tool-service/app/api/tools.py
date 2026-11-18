@@ -17,6 +17,16 @@ from app.models.tool import (
     PaymentResponse,
     RefundResponse,
     ToolQueryRequest,
+    RefundExecutionRequest,
+    RefundExecutionResponse,
+    OrderStatusUpdateRequest,
+    ShippingLabelRequest,
+    ShippingLabelResponse,
+)
+from app.tools.actions import (
+    execute_refund_action,
+    update_order_status_action,
+    generate_shipping_label_action,
 )
 from app.tools.agent import QwenToolAgent, ToolCallingResult
 from app.tools.customer import CustomerNotFoundError, get_customer
@@ -167,5 +177,87 @@ async def query_tools(request: ToolQueryRequest) -> ToolCallingResult:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Tool calling execution failed: {str(err)}",
         )
+
+
+# =============================================================================
+# Action Execution Endpoints (Phase 2 Mutation APIs)
+# =============================================================================
+
+@router.post(
+    "/refunds/execute",
+    response_model=RefundExecutionResponse,
+    summary="Execute Authoritative Refund",
+    description="Processes a payment gateway refund and records transaction details in SQLite.",
+)
+async def execute_refund(request: RefundExecutionRequest) -> RefundExecutionResponse:
+    """HTTP handler executing authoritative refund and updating database state."""
+    try:
+        return execute_refund_action(
+            order_id=request.order_id,
+            customer_id=request.customer_id,
+            amount=request.amount,
+            reason=request.reason,
+            refund_id=request.refund_id,
+            payment_method=request.payment_method or "ORIGINAL_PAYMENT_METHOD",
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except OrderNotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Refund execution failed: {str(err)}",
+        )
+
+
+@router.post(
+    "/orders/{order_id}/update-status",
+    response_model=OrderResponse,
+    summary="Update Order Lifecycle Status",
+    description="Mutates order status (e.g. RETURN_INITIATED, REFUNDED) in operational database.",
+)
+async def update_order_status(
+    order_id: str,
+    request: OrderStatusUpdateRequest,
+) -> OrderResponse:
+    """HTTP handler updating order status."""
+    try:
+        return update_order_status_action(
+            order_id=order_id,
+            new_status=request.status,
+            reason=request.reason,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except OrderNotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Order status update failed: {str(err)}",
+        )
+
+
+@router.post(
+    "/shipping/generate-label",
+    response_model=ShippingLabelResponse,
+    summary="Generate Prepaid Return Shipping Label",
+    description="Allocates carrier tracking number and creates shipment voucher in SQLite.",
+)
+async def generate_shipping_label(request: ShippingLabelRequest) -> ShippingLabelResponse:
+    """HTTP handler generating return shipping label."""
+    try:
+        return generate_shipping_label_action(
+            order_id=request.order_id,
+            customer_id=request.customer_id,
+            carrier=request.carrier,
+        )
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Shipping label generation failed: {str(err)}",
+        )
+
 
 

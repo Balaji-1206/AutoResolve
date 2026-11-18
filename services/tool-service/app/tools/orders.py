@@ -8,7 +8,9 @@ import json
 import os
 from pathlib import Path
 import re
+import sqlite3
 from typing import Dict, List, Optional
+from app.database import get_db_connection
 from app.models.tool import OrderResponse
 
 
@@ -18,6 +20,23 @@ class OrderNotFoundError(Exception):
 
 
 _ORDERS_CACHE: Optional[Dict[str, OrderResponse]] = None
+
+
+def _row_to_order(row: sqlite3.Row) -> OrderResponse:
+    """Maps a SQLite order record to the typed OrderResponse model."""
+    return OrderResponse(
+        order_id=row["order_id"],
+        customer_id=row["customer_id"],
+        status=row["status"],
+        total_amount=float(row["amount"]),
+        currency=row["currency"] or "USD",
+        order_date=row["order_date"],
+        delivery_date=row["delivered_at"],
+        shipping_status=row["shipping_status"],
+        product_category=row["product_category"],
+        payment_id=row["payment_id"],
+        refundable=bool(row["refundable"]) if row["refundable"] is not None else True,
+    )
 
 
 def _find_orders_file() -> Path:
@@ -105,6 +124,19 @@ def get_order(order_id: str) -> OrderResponse:
     if not re.match(r"^ORD-\d+$", clean_id):
         raise ValueError(f"Invalid order ID format: '{order_id}'. Expected format: 'ORD-XXXX'")
 
+    # Check SQLite database first
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders WHERE order_id = ?;", (clean_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return _row_to_order(row)
+    except Exception:
+        pass
+
+    # Fallback to in-memory JSON cache
     index = _load_orders_index()
     if clean_id not in index:
         raise OrderNotFoundError(f"Order '{clean_id}' not found in operational database.")
@@ -116,6 +148,20 @@ def list_orders(customer_id: Optional[str] = None) -> List[OrderResponse]:
     """
     Retrieve list of orders from the operational store, optionally filtered by customer_id.
     """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if customer_id:
+            cursor.execute("SELECT * FROM orders WHERE customer_id = ? ORDER BY order_date DESC;", (customer_id.strip().upper(),))
+        else:
+            cursor.execute("SELECT * FROM orders ORDER BY order_date DESC;")
+        rows = cursor.fetchall()
+        conn.close()
+        if rows:
+            return [_row_to_order(r) for r in rows]
+    except Exception:
+        pass
+
     index = _load_orders_index()
     orders = list(index.values())
     if customer_id:

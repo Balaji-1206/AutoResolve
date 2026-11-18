@@ -4,11 +4,14 @@ Refund Investigation Tool Implementation.
 Provides fast, in-memory indexed lookup for refund claims and status from operational datasets.
 """
 
+from datetime import datetime
 import json
 import os
 from pathlib import Path
 import re
+import sqlite3
 from typing import Dict, Optional
+from app.database import get_db_connection
 from app.models.tool import RefundResponse
 
 
@@ -18,6 +21,21 @@ class RefundNotFoundError(Exception):
 
 
 _REFUNDS_CACHE: Optional[Dict[str, RefundResponse]] = None
+
+
+def _row_to_refund(row: sqlite3.Row) -> RefundResponse:
+    """Maps a SQLite refund row to the typed RefundResponse model."""
+    return RefundResponse(
+        refund_id=row["refund_id"],
+        order_id=row["order_id"],
+        customer_id=row["customer_id"],
+        amount=float(row["amount"]),
+        status=row["status"],
+        reason=row["reason"] or "General return",
+        requested_at=row["requested_at"],
+        approved_at=row["approved_at"],
+        processed_at=row["processed_at"],
+    )
 
 
 def _find_refunds_file() -> Path:
@@ -98,11 +116,61 @@ def get_refund(refund_id: str) -> RefundResponse:
 
     clean_id = refund_id.strip().upper()
 
-    if not re.match(r"^REF-\d+$", clean_id):
+    if not re.match(r"^REF-[A-Z0-9\-]+$", clean_id):
         raise ValueError(f"Invalid refund ID format: '{refund_id}'. Expected format: 'REF-XXXX'")
+
+    # Check SQLite database first
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM refunds WHERE refund_id = ?;", (clean_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return _row_to_refund(row)
+    except Exception:
+        pass
 
     index = _load_refunds_index()
     if clean_id not in index:
         raise RefundNotFoundError(f"Refund '{clean_id}' not found in operational database.")
 
     return index[clean_id]
+
+
+def create_or_update_refund(
+    refund_id: str,
+    order_id: str,
+    customer_id: str,
+    amount: float,
+    status: str = "PENDING",
+    reason: str = "Customer request",
+    approved_at: Optional[str] = None,
+    processed_at: Optional[str] = None,
+) -> RefundResponse:
+    """
+    Persists or updates a refund claim into SQLite and returns the typed record.
+    """
+    clean_id = refund_id.strip().upper()
+    now_iso = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+    conn = get_db_connection()
+    with conn:
+        conn.execute("""
+            INSERT OR REPLACE INTO refunds (
+                refund_id, order_id, customer_id, amount, status, reason, requested_at, approved_at, processed_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (clean_id, order_id, customer_id, amount, status, reason, now_iso, approved_at, processed_at))
+    conn.close()
+
+    return RefundResponse(
+        refund_id=clean_id,
+        order_id=order_id,
+        customer_id=customer_id,
+        amount=amount,
+        status=status,
+        reason=reason,
+        requested_at=now_iso,
+        approved_at=approved_at,
+        processed_at=processed_at,
+    )
