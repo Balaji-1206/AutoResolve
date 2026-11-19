@@ -17,6 +17,7 @@ from app.models.resolution import (
     InvestigationRequest,
     InvestigationResponse,
     InvestigationStatus,
+    OperationalEvidence,
 )
 from app.workflows.graph import create_resolution_graph
 from app.workflows.reasoning import QwenReasoner
@@ -70,7 +71,25 @@ class InvestigationWorkflow:
             final_state = await self.graph.ainvoke(init_state, config=config)
             response = final_state.get("final_response")
             if not response:
-                raise RuntimeError("Graph execution finished without generating final_response.")
+                if final_state.get("requires_human_review", False):
+                    dt = round((time.time() - t0) * 1000, 2)
+                    response = InvestigationResponse(
+                        ticket_id=request.ticket_id,
+                        status=InvestigationStatus.COMPLETED if not final_state.get("errors") else InvestigationStatus.PARTIAL_EVIDENCE,
+                        decision=final_state.get("decision", BusinessDecision.NEEDS_HUMAN_REVIEW),
+                        summary=final_state.get("summary") or "Your request requires review and approval by a support supervisor.",
+                        reasoning_summary=final_state.get("reasoning_summary") or "Supervisor authorization required under store policy thresholds.",
+                        policy_evidence=final_state.get("policy_evidence", []),
+                        operational_evidence=final_state.get("operational_evidence", OperationalEvidence()),
+                        missing_information=final_state.get("missing_information", []),
+                        requires_human_review=True,
+                        review_reasons=final_state.get("review_reasons", []),
+                        actions_taken=[],
+                        errors=final_state.get("errors", []),
+                        duration_ms=dt,
+                    )
+                else:
+                    raise RuntimeError("Graph execution finished without generating final_response.")
 
             # Phase 2: Automated Action Execution (Mutations)
             # If eligible and approved without human review, execute authoritative refund & return label!
