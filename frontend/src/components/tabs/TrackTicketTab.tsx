@@ -90,15 +90,14 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
   const isUnderReview = ticket?.decision === "NEEDS_HUMAN_REVIEW" || ticket?.status === "PENDING_REVIEW";
   const isDeclined = ticket?.decision === "INELIGIBLE" || ticket?.status === "REJECTED";
 
-  const currentStep = isApproved ? 5 : isUnderReview ? 3 : isDeclined ? 3 : 2;
-
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* 🌟 1. Apple-Style Fluid Search & Lookup Bar */}
+      {/* 🍎 1. Apple-Style Fluid Search & Lookup Bar */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-panel-elevated p-6 sm:p-8 rounded-3xl border border-white shadow-xl bg-white/80 backdrop-blur-2xl space-y-4"
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="ios-glass-elevated p-6 sm:p-8 rounded-[2rem] border border-white/90 shadow-xl space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -110,7 +109,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
             </p>
           </div>
 
-          <span className="px-3 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200">
+          <span className="ios-pill px-3 py-1 text-xs font-black bg-indigo-50/90 text-indigo-700 border-indigo-200">
             Real-Time Resolution Ledger
           </span>
         </div>
@@ -129,7 +128,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
               placeholder="Enter Ticket ID (e.g. TCK-1001 or TCK-1002)"
               value={ticketQuery}
               onChange={(e) => setTicketQuery(e.target.value.toUpperCase())}
-              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white text-sm font-bold text-slate-900 outline-none shadow-sm transition-all"
+              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50/80 border border-slate-200 focus:border-indigo-500 focus:bg-white text-sm font-bold text-slate-900 outline-none shadow-xs transition-all"
             />
           </div>
 
@@ -142,7 +141,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
               <RefreshCw className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>Track Request</span>
+                <span>Lookup Status</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -174,19 +173,20 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
         )}
       </motion.div>
 
-      {/* 🌟 2. Ticket Tracking Progress Display */}
+      {/* 🍎 2. Ticket Tracking Progress Display */}
       {ticket ? (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-6"
         >
           {/* Main Status Header Card */}
-          <div className="glass-panel-elevated p-6 sm:p-8 rounded-3xl border border-white shadow-xl bg-white/80 backdrop-blur-2xl space-y-6">
+          <div className="ios-glass-elevated p-6 sm:p-8 rounded-[2rem] border border-white/90 shadow-xl space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-5 border-slate-100">
               <div className="flex items-center gap-3.5">
                 <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md ${
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md ring-2 ring-white/90 ${
                     isApproved
                       ? "bg-gradient-to-tr from-emerald-600 to-teal-600 shadow-emerald-500/25"
                       : isUnderReview
@@ -209,12 +209,12 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
                       {ticket.ticket_id}
                     </h3>
                     <span
-                      className={`px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                      className={`ios-pill px-3 py-0.5 text-xs font-black uppercase tracking-wider ${
                         isApproved
-                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                           : isUnderReview
-                          ? "bg-amber-100 text-amber-900 border border-amber-300"
-                          : "bg-rose-100 text-rose-800 border border-rose-300"
+                          ? "bg-amber-100 text-amber-900 border-amber-300"
+                          : "bg-rose-100 text-rose-800 border-rose-300"
                       }`}
                     >
                       {isApproved
@@ -241,22 +241,35 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
               )}
             </div>
 
-            {/* Apple iOS Fluid Multi-Step Progress Tracker */}
+            {/* 🌊 Laminar Flow Multi-Step Progress Tracker with Conduit Pipe */}
             <div className="py-4">
               <div className="relative">
-                {/* Connecting Line */}
-                <div className="absolute top-5 left-6 right-6 h-1 bg-slate-100 rounded-full hidden sm:block">
+                {/* Laminar Conduit Pipe */}
+                <div className="absolute top-5 left-6 right-6 h-2 bg-slate-100/90 rounded-full hidden sm:block overflow-hidden border border-slate-200/50">
                   <div
-                    className={`h-full rounded-full transition-all duration-700 ${
-                      isApproved ? "bg-emerald-500 w-full" : isUnderReview ? "bg-amber-400 w-1/2" : "bg-rose-400 w-1/2"
+                    className={`h-full rounded-full transition-all duration-700 relative overflow-hidden ${
+                      isApproved
+                        ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600 w-full"
+                        : isUnderReview
+                        ? "bg-gradient-to-r from-amber-400 to-orange-500 w-1/2"
+                        : "bg-gradient-to-r from-rose-400 to-pink-500 w-1/2"
                     }`}
-                  />
+                  >
+                    {/* Continuous fluid pulse stream */}
+                    <div
+                      className={
+                        isApproved
+                          ? "laminar-pulse-stream-emerald"
+                          : "laminar-pulse-stream"
+                      }
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 relative z-10">
                   {/* Step 1 */}
                   <div className="text-center sm:text-left space-y-1">
-                    <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md shadow-emerald-500/25">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md shadow-emerald-500/25 ring-2 ring-white">
                       ✓
                     </div>
                     <div className="font-black text-xs text-slate-900 pt-1">
@@ -269,7 +282,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
 
                   {/* Step 2 */}
                   <div className="text-center sm:text-left space-y-1">
-                    <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md shadow-emerald-500/25">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md shadow-emerald-500/25 ring-2 ring-white">
                       ✓
                     </div>
                     <div className="font-black text-xs text-slate-900 pt-1">
@@ -283,7 +296,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
                   {/* Step 3 */}
                   <div className="text-center sm:text-left space-y-1">
                     <div
-                      className={`w-10 h-10 rounded-2xl text-white font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md ${
+                      className={`w-10 h-10 rounded-2xl text-white font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md ring-2 ring-white ${
                         isApproved
                           ? "bg-emerald-500 shadow-emerald-500/25"
                           : isUnderReview
@@ -308,7 +321,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
                   {/* Step 4 */}
                   <div className="text-center sm:text-left space-y-1">
                     <div
-                      className={`w-10 h-10 rounded-2xl font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md ${
+                      className={`w-10 h-10 rounded-2xl font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md ring-2 ring-white ${
                         isApproved
                           ? "bg-emerald-500 text-white shadow-emerald-500/25"
                           : "bg-slate-100 text-slate-400"
@@ -327,7 +340,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
                   {/* Step 5 */}
                   <div className="text-center sm:text-left space-y-1">
                     <div
-                      className={`w-10 h-10 rounded-2xl font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md ${
+                      className={`w-10 h-10 rounded-2xl font-black text-sm flex items-center justify-center mx-auto sm:mx-0 shadow-md ring-2 ring-white ${
                         isApproved
                           ? "bg-emerald-500 text-white shadow-emerald-500/25"
                           : "bg-slate-100 text-slate-400"
@@ -350,7 +363,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
             {isApproved && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {gatewayTx && (
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-3 shadow-xs">
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 flex items-center justify-between gap-3 shadow-xs">
                     <div className="flex items-center gap-2.5">
                       <CreditCard className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                       <div>
@@ -367,7 +380,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
                 )}
 
                 {trackingNumber && (
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-3 shadow-xs">
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 flex items-center justify-between gap-3 shadow-xs">
                     <div className="flex items-center gap-2.5">
                       <Truck className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                       <div>
@@ -386,7 +399,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
             )}
 
             {/* Customer Message & AI Summary */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <span className="font-black text-slate-700 uppercase tracking-wider text-[10px]">
                   Resolution Findings & Policy Assessment
@@ -403,7 +416,7 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
 
           {/* Audit Logs Trail */}
           {auditLogs.length > 0 && (
-            <div className="glass-panel p-6 rounded-3xl border border-white shadow-sm bg-white/70 backdrop-blur-xl space-y-4">
+            <div className="ios-glass p-6 rounded-[2rem] border border-white/90 shadow-sm space-y-4">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-indigo-600" />
                 <h4 className="font-black text-sm text-slate-900">
@@ -438,8 +451,8 @@ export const TrackTicketTab: React.FC<TrackTicketTabProps> = ({
           )}
         </motion.div>
       ) : (
-        <div className="glass-panel-elevated p-12 rounded-3xl text-center space-y-3 bg-white/70 border border-white shadow-xl">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+        <div className="ios-glass-elevated p-12 rounded-[2rem] text-center space-y-3 border border-white/90 shadow-xl">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto ring-1 ring-indigo-100">
             <Search className="w-7 h-7" />
           </div>
           <h3 className="text-base sm:text-lg font-black text-slate-900">

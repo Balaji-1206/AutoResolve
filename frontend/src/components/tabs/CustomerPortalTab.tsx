@@ -53,6 +53,11 @@ interface CustomerPortalTabProps {
   initialInquiryText?: string;
 }
 
+const DEFAULT_CUSTOMER_INQUIRY = `Customer Name: Aarav Kumar
+Email: aarav.kumar@example.com (Account ID: CUS-1001)
+Order Number: ORD-1001 (Running Shoes - $120.00)
+Inquiry Details: Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well and are unworn in their original packaging. Can I return them for a full refund under the 30-day guarantee?`;
+
 export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
   onSwitchTab,
   onNewResult,
@@ -61,10 +66,9 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
   initialInquiryText,
 }) => {
   const [selectedProfile, setSelectedProfile] = useState<CustomerProfile>(CUSTOMER_PROFILES[0]);
-  const [orderId, setOrderId] = useState<string>(initialOrderId || CUSTOMER_PROFILES[0].recentOrderId);
+  const [orderId, setOrderId] = useState<string>(initialOrderId || "ORD-1001");
   const [inquiryText, setInquiryText] = useState<string>(
-    initialInquiryText ||
-      "Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well. Can I exchange or return them?"
+    initialInquiryText || DEFAULT_CUSTOMER_INQUIRY
   );
 
   React.useEffect(() => {
@@ -308,28 +312,28 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
         <div className="flex flex-wrap gap-2">
           {[
             {
-              label: "👟 Return Running Shoes (ORD-1001)",
+              label: "👟 Return Shoes (Aarav Kumar • ORD-1001)",
               orderId: "ORD-1001",
               profileId: "cus-1",
-              text: "Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well. Can I exchange or return them?",
+              text: `Customer Name: Aarav Kumar\nEmail: aarav.kumar@example.com (Account ID: CUS-1001)\nOrder Number: ORD-1001 (Running Shoes - $120.00)\nInquiry Details: Hi, I received my running shoes from order ORD-1001 14 days ago. They don't fit well and are unworn in their original packaging. Can I return them for a full refund under the 30-day guarantee?`,
             },
             {
-              label: "📺 Return 4K TV - High Value (ORD-1002)",
+              label: "📺 Return 4K TV > $500 (Priya Sharma • ORD-1002)",
               orderId: "ORD-1002",
               profileId: "cus-2",
-              text: "I want to return the 4K Ultra HD TV in order ORD-1002. The screen size does not fit my living room stand.",
+              text: `Customer Name: Priya Sharma\nEmail: priya.sharma@example.com (Account ID: CUS-1002)\nOrder Number: ORD-1002 (4K Ultra HD TV - $1,299.99)\nInquiry Details: I want to return the 4K Ultra HD TV in order ORD-1002. The screen size does not fit my living room stand. I have all original cables and the box.`,
             },
             {
-              label: "🎨 Return Handcrafted Craft (ORD-1005)",
+              label: "🎨 Final Sale Craft (Rohan Gupta • ORD-1005)",
               orderId: "ORD-1005",
               profileId: "cus-3",
-              text: "I bought a custom engraved wood craft set in order ORD-1005 and I changed my mind. Please refund it.",
+              text: `Customer Name: Rohan Gupta\nEmail: rohan.gupta@example.com (Account ID: CUS-1005)\nOrder Number: ORD-1005 (Handcrafted Wooden Craft - $45.00)\nInquiry Details: I bought a custom engraved wood craft set in order ORD-1005 and I changed my mind. Please refund it to my original payment card.`,
             },
             {
-              label: "📦 Damaged Delivery Claim (ORD-1006)",
+              label: "📦 Damaged Delivery Claim (Neha Patel • ORD-1006)",
               orderId: "ORD-1006",
               profileId: "cus-4",
-              text: "My order ORD-1006 arrived damaged yesterday and parts are missing. I want a refund right away.",
+              text: `Customer Name: Neha Patel\nEmail: neha.patel@example.com (Account ID: CUS-1006)\nOrder Number: ORD-1006 (Kitchen Cookware Set - $185.00)\nInquiry Details: My order ORD-1006 arrived yesterday with a cracked glass lid and missing handles. I want a replacement or an immediate refund.`,
             },
           ].map((topic, i) => (
             <motion.button
@@ -379,15 +383,37 @@ export const CustomerPortalTab: React.FC<CustomerPortalTabProps> = ({
 
             {/* Inquiry Message Textarea */}
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                What would you like assistance with?
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-slate-700">
+                  What would you like assistance with?
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOrderId("ORD-1001");
+                      setInquiryText(DEFAULT_CUSTOMER_INQUIRY);
+                      toast.info("Default Info Loaded", "Pre-filled customer info (Aarav Kumar • ORD-1001)");
+                    }}
+                    className="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded-md transition-colors"
+                  >
+                    Reset Default Info
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInquiryText("")}
+                    className="text-[10px] font-bold text-slate-400 hover:text-slate-600 px-1.5 py-0.5 rounded transition-colors"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
               <textarea
-                rows={4}
+                rows={5}
                 value={inquiryText}
                 onChange={(e) => setInquiryText(e.target.value)}
                 placeholder="Explain what happened with your item, delivery, or return request..."
-                className="w-full p-4 text-xs sm:text-sm rounded-2xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 outline-none font-medium text-slate-800 leading-relaxed shadow-sm resize-none"
+                className="w-full p-3.5 text-xs rounded-2xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 outline-none font-medium text-slate-800 leading-relaxed shadow-sm resize-none font-mono"
               />
             </div>
 

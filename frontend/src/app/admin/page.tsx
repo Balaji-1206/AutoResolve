@@ -36,6 +36,7 @@ import {
 } from "@/lib/api";
 import { ToastProvider, useToast } from "@/components/Toast";
 import { CopyButton } from "@/components/CopyButton";
+import { LaminarFlowBackground } from "@/components/LaminarFlowBackground";
 
 function AdminConsoleContent() {
   const [reviews, setReviews] = useState<AdminSupervisorReview[]>([]);
@@ -89,7 +90,6 @@ function AdminConsoleContent() {
         `Refund and return voucher allocated. Action: ${res.actions_taken.join(" • ") || "Executed"}`
       );
 
-      // Refresh list
       setReviews((prev) => prev.filter((r) => r.ticket_id !== caseItem.ticket_id));
       setSelectedCase(null);
       setReviewNotes("");
@@ -132,51 +132,36 @@ function AdminConsoleContent() {
 
   return (
     <main className="relative min-h-screen flex flex-col justify-between overflow-hidden mesh-subtle-overlay selection:bg-amber-100 selection:text-amber-900">
-      {/* 🌟 1. Apple Fluid Amber / Rose Ambient Orbs */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <motion.div
-          animate={{
-            x: [0, 40, -30, 0],
-            y: [0, -50, 25, 0],
-            scale: [1, 1.15, 0.95, 1],
-          }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-32 -left-32 w-[34rem] h-[34rem] rounded-full bg-gradient-to-tr from-amber-400/20 via-orange-300/15 to-transparent blur-3xl"
-        />
+      {/* 🌊 1. Apple iOS Laminar Flow Streamline Background (Warm Amber / Rose Spectrum) */}
+      <LaminarFlowBackground variant="admin" />
 
-        <motion.div
-          animate={{
-            x: [0, -45, 35, 0],
-            y: [0, 55, -25, 0],
-            scale: [1, 1.2, 0.95, 1],
-          }}
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 -right-36 w-[36rem] h-[36rem] rounded-full bg-gradient-to-bl from-rose-300/20 via-orange-200/15 to-transparent blur-3xl"
-        />
-      </div>
-
-      {/* 🌟 2. Apple iOS Fluid Frosted Glass Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-white/80 bg-white/70 backdrop-blur-2xl">
+      {/* 🍎 2. Apple VisionOS Liquid Frosted Glass Navigation Header */}
+      <header className="sticky top-0 z-40 w-full border-b border-white/80 bg-white/70 backdrop-blur-3xl shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              className="ios-pill p-2 text-slate-700 hover:text-slate-900 transition-colors shadow-xs"
               title="Return to Portal Selector"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </Link>
 
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/25 ring-2 ring-white/95">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 3 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="w-10 h-10 rounded-[1.1rem] bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/25 ring-2 ring-white/95"
+            >
               <ShieldCheck className="w-5 h-5" />
-            </div>
+            </motion.div>
 
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 leading-none">
                   Operations Console
                 </span>
-                <span className="px-2.5 py-0.5 text-[10px] font-black rounded-full bg-amber-100 text-amber-900 border border-amber-300 shadow-sm leading-tight">
+                <span className="ios-pill px-2.5 py-0.5 text-[10px] font-black bg-amber-100/90 text-amber-900 border-amber-300">
                   Supervisor Level
                 </span>
               </div>
@@ -190,7 +175,7 @@ function AdminConsoleContent() {
             <button
               onClick={loadData}
               disabled={isRefreshing}
-              className="p-2.5 rounded-xl bg-white/90 border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all shadow-xs flex items-center gap-1.5 text-xs font-bold"
+              className="ios-pill px-3 py-1.5 text-slate-700 hover:text-slate-900 transition-all shadow-xs flex items-center gap-1.5 text-xs font-bold"
               title="Refresh Queue"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
@@ -200,7 +185,7 @@ function AdminConsoleContent() {
             <Link
               href="/customer"
               target="_blank"
-              className="px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+              className="ios-pill px-3 py-1.5 bg-indigo-50/90 border-indigo-200 text-indigo-700 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 transition-colors shadow-xs"
             >
               <span>View Customer Portal</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -209,13 +194,14 @@ function AdminConsoleContent() {
         </div>
       </header>
 
-      {/* 🌟 3. Main Dashboard Body */}
+      {/* 🍎 3. Main Dashboard Body */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-6">
-        {/* KPI Summary Cards (Apple Fluid Style) */}
+        {/* KPI Summary Cards (Apple iOS Fluid Style with Squircle Geometries) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <motion.div
-            whileHover={{ y: -3 }}
-            className="glass-panel p-5 rounded-3xl border border-white/90 shadow-sm bg-white/70 backdrop-blur-xl flex items-center justify-between"
+            whileHover={{ y: -4 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="ios-glass-elevated p-6 rounded-[2rem] border border-white/90 shadow-sm flex items-center justify-between"
           >
             <div>
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -228,14 +214,15 @@ function AdminConsoleContent() {
                 Requires manual authorization
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100 shadow-xs">
               <AlertTriangle className="w-6 h-6" />
             </div>
           </motion.div>
 
           <motion.div
-            whileHover={{ y: -3 }}
-            className="glass-panel p-5 rounded-3xl border border-white/90 shadow-sm bg-white/70 backdrop-blur-xl flex items-center justify-between"
+            whileHover={{ y: -4 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="ios-glass-elevated p-6 rounded-[2rem] border border-white/90 shadow-sm flex items-center justify-between"
           >
             <div>
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -248,14 +235,15 @@ function AdminConsoleContent() {
                 External asynchronous channel
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center ring-1 ring-indigo-100 shadow-xs">
               <Radio className="w-6 h-6 animate-pulse" />
             </div>
           </motion.div>
 
           <motion.div
-            whileHover={{ y: -3 }}
-            className="glass-panel p-5 rounded-3xl border border-white/90 shadow-sm bg-white/70 backdrop-blur-xl flex items-center justify-between"
+            whileHover={{ y: -4 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="ios-glass-elevated p-6 rounded-[2rem] border border-white/90 shadow-sm flex items-center justify-between"
           >
             <div>
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -269,23 +257,30 @@ function AdminConsoleContent() {
                 LangGraph Checkpointer Active
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-100 shadow-xs">
               <Layers className="w-6 h-6" />
             </div>
           </motion.div>
         </div>
 
-        {/* Apple iOS Fluid Segmented Control */}
-        <div className="flex items-center justify-between border-b pb-4 border-slate-200">
-          <div className="glass-panel p-1.5 rounded-2xl border border-white shadow-sm flex items-center gap-1 bg-white/60">
+        {/* 🌊 Apple iOS Fluid Segmented Control Dock */}
+        <div className="flex items-center justify-between border-b pb-4 border-slate-200/80">
+          <div className="ios-glass p-1.5 rounded-[1.6rem] border border-white/90 shadow-xs flex items-center gap-1.5">
             <button
               onClick={() => setActiveTab("queue")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
+              className={`relative px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 z-10 ${
                 activeTab === "queue"
-                  ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
+                  ? "text-white"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
+              {activeTab === "queue" && (
+                <motion.div
+                  layoutId="adminSegmentPill"
+                  className="absolute inset-0 bg-slate-900 rounded-2xl shadow-md -z-10"
+                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                />
+              )}
               <span>Pending Reviews</span>
               {pendingReviewsList.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500 text-white font-black">
@@ -296,12 +291,19 @@ function AdminConsoleContent() {
 
             <button
               onClick={() => setActiveTab("alerts")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
+              className={`relative px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 z-10 ${
                 activeTab === "alerts"
-                  ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
+                  ? "text-white"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
+              {activeTab === "alerts" && (
+                <motion.div
+                  layoutId="adminSegmentPill"
+                  className="absolute inset-0 bg-slate-900 rounded-2xl shadow-md -z-10"
+                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                />
+              )}
               <span>HITL Alerts Feed</span>
               {alerts.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] bg-indigo-500 text-white font-black">
@@ -320,8 +322,8 @@ function AdminConsoleContent() {
         {activeTab === "queue" && (
           <div className="space-y-4">
             {pendingReviewsList.length === 0 ? (
-              <div className="glass-panel-elevated p-12 rounded-3xl text-center space-y-3 bg-white/70 border border-white shadow-lg">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+              <div className="ios-glass-elevated p-12 rounded-[2rem] text-center space-y-3 border border-white/90 shadow-lg">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto ring-1 ring-emerald-100">
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-black text-slate-900">
@@ -339,11 +341,12 @@ function AdminConsoleContent() {
                     layout
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass-panel-elevated p-6 rounded-3xl border border-white/90 shadow-md bg-white/80 backdrop-blur-xl hover:shadow-xl transition-all space-y-4"
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="ios-glass-elevated p-6 rounded-[2rem] border border-white/90 shadow-sm hover:shadow-xl transition-all space-y-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0 font-black text-xs">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0 font-black text-xs ring-1 ring-amber-200">
                           <AlertTriangle className="w-5 h-5 text-amber-700" />
                         </div>
                         <div>
@@ -352,7 +355,7 @@ function AdminConsoleContent() {
                               {review.ticket_id}
                             </h4>
                             {review.order_id && (
-                              <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-100 text-slate-700">
+                              <span className="ios-pill px-2.5 py-0.5 text-xs font-black bg-slate-100 text-slate-700">
                                 {review.order_id}
                               </span>
                             )}
@@ -364,14 +367,14 @@ function AdminConsoleContent() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
+                        <span className="ios-pill px-3 py-1 text-xs font-black bg-amber-100/90 text-amber-900 border-amber-300">
                           NEEDS SUPERVISOR SIGN-OFF
                         </span>
                       </div>
                     </div>
 
                     {/* Customer Message */}
-                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium space-y-1">
+                    <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 text-xs text-slate-800 font-medium space-y-1">
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         Customer Inquiry
                       </div>
@@ -433,20 +436,20 @@ function AdminConsoleContent() {
         {/* Tab 2: Asynchronous HITL Alerts Feed */}
         {activeTab === "alerts" && (
           <div className="space-y-4">
-            <div className="glass-panel p-4 rounded-2xl bg-white/70 border border-white text-xs text-slate-600 flex items-center justify-between">
+            <div className="ios-glass p-4 rounded-2xl border border-white/90 text-xs text-slate-600 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Radio className="w-4 h-4 text-indigo-600 animate-pulse" />
                 <span className="font-bold text-slate-800">
                   External Notification Dispatcher Log
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <span className="ios-pill px-2.5 py-0.5 text-[10px] font-black bg-indigo-50 text-indigo-700 border-indigo-200">
                 Channel: slack:#support-escalations
               </span>
             </div>
 
             {alerts.length === 0 ? (
-              <div className="glass-panel p-10 rounded-3xl text-center space-y-2 text-slate-400 bg-white/60">
+              <div className="ios-glass p-10 rounded-[2rem] text-center space-y-2 text-slate-400">
                 <Radio className="w-8 h-8 mx-auto text-slate-300" />
                 <p className="text-xs font-semibold">No external alerts recorded yet.</p>
               </div>
@@ -457,7 +460,7 @@ function AdminConsoleContent() {
                     key={alert.alert_id}
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 rounded-2xl bg-white/85 border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4"
+                    className="ios-glass-elevated p-4 rounded-2xl border border-white/90 shadow-xs flex flex-wrap items-center justify-between gap-4"
                   >
                     <div className="space-y-1 max-w-xl">
                       <div className="flex items-center gap-2">
@@ -479,18 +482,18 @@ function AdminConsoleContent() {
 
                     <div className="flex items-center gap-2">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        className={`ios-pill px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
                           alert.severity === "CRITICAL"
-                            ? "bg-rose-100 text-rose-800 border border-rose-300"
+                            ? "bg-rose-100 text-rose-800 border-rose-300"
                             : alert.severity === "HIGH"
-                            ? "bg-amber-100 text-amber-800 border border-amber-300"
-                            : "bg-slate-100 text-slate-700"
+                            ? "bg-amber-100 text-amber-800 border-amber-300"
+                            : "bg-slate-100 text-slate-700 border-slate-200"
                         }`}
                       >
                         {alert.severity}
                       </span>
 
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                      <span className="ios-pill px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         {alert.status}
                       </span>
@@ -503,19 +506,20 @@ function AdminConsoleContent() {
         )}
       </div>
 
-      {/* 🌟 4. Case Inspection & Sign-off Drawer Modal */}
+      {/* 🍎 4. Apple iOS Modal Sheet (Inspection & Sign-off) */}
       <AnimatePresence>
         {selectedCase && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="glass-panel-elevated bg-white/95 rounded-3xl border border-white shadow-2xl w-full max-w-2xl p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto"
+              transition={{ type: "spring", stiffness: 350, damping: 28 }}
+              className="ios-glass-elevated bg-white/95 rounded-[2.5rem] border border-white shadow-2xl w-full max-w-2xl p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b pb-4 border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/25">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/25 ring-2 ring-white">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
@@ -538,7 +542,7 @@ function AdminConsoleContent() {
 
               {/* Case Details Grid */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Customer ID
                   </span>
@@ -547,7 +551,7 @@ function AdminConsoleContent() {
                   </div>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Current AI Status
                   </span>
@@ -558,7 +562,7 @@ function AdminConsoleContent() {
               </div>
 
               {/* Customer Text */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs">
+              <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1.5 text-xs">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
                   Original Customer Message
                 </span>
@@ -568,7 +572,7 @@ function AdminConsoleContent() {
               </div>
 
               {/* AI Reasoning Summary */}
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5">
+              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs space-y-1.5">
                 <span className="text-[10px] font-black text-amber-800 uppercase tracking-wider block">
                   Reason for Review & Policy Analysis
                 </span>
@@ -587,7 +591,7 @@ function AdminConsoleContent() {
                   value={reviewNotes}
                   onChange={(e) => setReviewNotes(e.target.value)}
                   placeholder="e.g. Verified customer history. Approved one-time exception under 100% satisfaction guarantee."
-                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white text-xs font-medium text-slate-900 outline-none"
+                  className="w-full p-3 rounded-2xl bg-slate-50/80 border border-slate-200 focus:border-indigo-500 focus:bg-white text-xs font-medium text-slate-900 outline-none shadow-xs"
                 />
               </div>
 
@@ -623,11 +627,11 @@ function AdminConsoleContent() {
         )}
       </AnimatePresence>
 
-      {/* 🌟 5. Apple Fluid Glass Footer */}
-      <footer className="relative z-10 w-full border-t border-white/80 bg-white/60 backdrop-blur-xl py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between text-xs text-slate-400 font-semibold gap-4">
+      {/* 🍎 5. Apple iOS Liquid Frosted Footer */}
+      <footer className="relative z-10 w-full border-t border-white/80 bg-white/60 backdrop-blur-2xl py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between text-xs text-slate-500 font-semibold gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-slate-800">AutoResolve AI Operations</span>
+            <span className="font-extrabold text-slate-900">AutoResolve AI Operations</span>
             <span>•</span>
             <span>Automated Write Operations (Phase 2 Refund & Label Execution)</span>
           </div>
